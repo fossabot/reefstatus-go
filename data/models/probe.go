@@ -2,40 +2,38 @@ package models
 
 import (
 	"github.com/cjburchell/reefstatus-go/common"
+	"github.com/cjburchell/reefstatus-go/profilux"
 	"github.com/cjburchell/reefstatus-go/profilux/types"
 )
 
 type Probe struct {
 	SensorInfo
 
-	NominalValue            float64
-	SensorMode              types.SensorMode
-	AlarmEnable             bool
-	AlarmDeviation          float64
-	Value                   float64
-	OperationHours          int
-	MaxOperationHours       int
-	EnableMaxOperationHours bool
-	ConvertedValue          float64
-	CenterValue             float64
-	MaxRange                float64
-	MinRange                float64
+	NominalValue   float64
+	SensorMode     types.SensorMode
+	AlarmEnable    bool
+	AlarmDeviation float64
+	Value          float64
+	OperationHours int
+	ConvertedValue float64
+	CenterValue    float64
+	MaxRange       float64
+	MinRange       float64
 }
 
-func (probe *Probe) SetValue(value int) {
-	probeValue := probe.convertFromInt(value)
-	probe.Value = probeValue
-	probe.ConvertedValue = probe.convertValue(probeValue)
+func (probe *Probe) setValue(value float64) {
+	probe.Value = value
+	probe.ConvertedValue = probe.convertValue(value)
 }
 
-func (probe *Probe) SetNominalValue(value float64) {
+func (probe *Probe) setNominalValue(value float64) {
 	probe.NominalValue = value
 	probe.CenterValue = probe.convertValue(probe.NominalValue)
 	probe.MaxRange = probe.convertValue(probe.NominalValue + probe.AlarmDeviation)
 	probe.MinRange = probe.convertValue(probe.NominalValue - probe.AlarmDeviation)
 }
 
-func (probe *Probe) SetAlarmDeviation(value float64) {
+func (probe *Probe) setAlarmDeviation(value float64) {
 	probe.AlarmDeviation = value
 	probe.MaxRange = probe.convertValue(probe.NominalValue + probe.AlarmDeviation)
 	probe.MinRange = probe.convertValue(probe.NominalValue - probe.AlarmDeviation)
@@ -68,28 +66,22 @@ func (probe Probe) convertValue(value float64) float64 {
 	return common.Round(value, digits)
 }
 
-func (probe Probe) IsOverMaxOperationHours() bool {
-	return probe.EnableMaxOperationHours && probe.MaxOperationHours < (probe.OperationHours/60.0)
-}
-
-func (probe Probe) convertFromInt(value int) float64 {
-	result := float64(value)
+func (probe Probe) getValueMultiplier() float64 {
 	switch probe.SensorType {
 	case types.SensorTypePH:
-		return result * 0.01
+		return 0.01
 	case types.SensorTypeAirTemperature:
 	case types.SensorTypeTemperature:
-		return result * 0.1
+		return 0.1
 	case types.SensorTypeConductivityF:
-		return result
+		return 1
 	case types.SensorTypeConductivity:
-		return result * 0.1
-
+		return 0.1
 	case types.SensorTypeOxygen:
 	case types.SensorTypeHumidity:
-		return result * 0.1
+		return 0.1
 	}
-	return result
+	return 1
 }
 
 func (probe Probe) getDigits() int {
@@ -242,8 +234,23 @@ func convertToSg(cond float64, offset bool) float64 {
 	}
 }
 
-func NewProbe() *Probe {
+func NewProbe(index int) *Probe {
 	var probe Probe
 	probe.Type = "Probe"
+	probe.Index = index
 	return &probe
+}
+
+func (probe *Probe) Update(controller *profilux.Controller) {
+	probe.SensorType = controller.GetSensorType(probe.Index)
+	probe.SensorMode = controller.GetSensorMode(probe.Index)
+	probe.DisplayName = controller.GetProbeName(probe.Index)
+	probe.setNominalValue(controller.GetSensorNominalValue(probe.Index, probe.getValueMultiplier()))
+	probe.setAlarmDeviation(controller.GetSensorAlarmDeviation(probe.Index, probe.getValueMultiplier()))
+	probe.AlarmEnable = controller.GetSensorAlarmEnable(probe.Index)
+
+	// Volatile data
+	probe.AlarmState = controller.GetSensorAlarm(probe.Index)
+	probe.setValue(controller.GetSensorValue(probe.Index, probe.getValueMultiplier()))
+	probe.OperationHours = controller.GetProbeOperationHours(probe.Index)
 }

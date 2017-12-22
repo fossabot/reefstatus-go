@@ -104,6 +104,15 @@ func (controller *Controller) getDataCurrentState(code int) (types.CurrentState,
 	return types.GetCurrentState(result), nil
 }
 
+func (controller *Controller) getDataCurrentStateConvert(code int, convert func(int) int) (types.CurrentState, error) {
+	result, err := controller.p.GetData(code)
+	if err != nil {
+		return "", err
+	}
+
+	return types.GetCurrentState(convert(result)), nil
+}
+
 func (controller *Controller) getDataFloat(code int, multiplier float64) (float64, error) {
 	result, err := controller.p.GetData(code)
 	if err != nil {
@@ -256,4 +265,155 @@ func (controller *Controller) GetMaintenanceText(index int) string {
 // endregion
 
 // region Probes
+
+func getSensorOffset(index int) int {
+	return getOffset(index, 8, 24)
+}
+
+func (controller *Controller) GetSensorCount() int {
+	count, _ := controller.getData(code5.GETSENSORCOUNT)
+	return count
+}
+
+func (controller *Controller) GetSensorType(index int) types.SensorType {
+	result, _ := controller.getDataEnum(code5.GETSENSORCOUNT+getSensorOffset(index), types.GetSensorType)
+	return types.SensorType(result)
+}
+
+func (controller *Controller) GetSensorMode(index int) types.SensorMode {
+	result, _ := controller.getDataEnum(code5.SENSORPARA1_CAL1ADC+getSensorOffset(index), func(value int) string {
+		return types.GetSensorMode(value >> 12)
+	})
+	return types.SensorMode(result)
+}
+
+func (controller *Controller) GetSensorActive(index int) bool {
+	props, _ := controller.getData(code5.SENSORPARA1_PROPS + getSensorOffset(index))
+	return props&0x1 == 1
+}
+
+func (controller *Controller) GetProbeName(index int) string {
+	name, _ := controller.getDataText(code5.SENSOR1_NAME + getOffset(index, 32, 1))
+	return name
+}
+
+func (controller *Controller) GetSensorNominalValue(index int, multiplier float64) float64 {
+	result, _ := controller.getDataFloat(code5.SENSORPARA1_DESVALUE+getSensorOffset(index), multiplier)
+	return result
+}
+
+func (controller *Controller) GetSensorAlarmDeviation(index int, multiplier float64) float64 {
+	result, _ := controller.getDataFloat(code5.SENSORPARA1_ALARMDEVIATION+getSensorOffset(index), multiplier)
+	return result
+}
+
+func (controller *Controller) GetSensorAlarmEnable(index int) bool {
+	result, _ := controller.getDataBool(code5.SENSORPARA1_ALARMMODE + getSensorOffset(index))
+	return result
+}
+
+func (controller *Controller) GetSensorAlarm(index int) types.CurrentState {
+	result, _ := controller.getDataCurrentStateConvert(code5.SENSORPARA1_ACTSTATE+getOffset(index, 8, 8), func(i int) int {
+		return i & 0x100
+	})
+	return result
+}
+
+func (controller *Controller) GetSensorValue(index int, multiplier float64) float64 {
+	result, _ := controller.getDataFloat(code5.SENSORPARA1_ACTVALUE+getOffset(index, 8, 8), multiplier)
+	return result
+}
+
+func (controller *Controller) GetProbeOperationHours(index int) int {
+	result, _ := controller.getData(code5.SENSORPARA1_OHM + getOffset(index, 8, 8))
+	return result
+}
+
+// endregion
+
+// region LevelSensor
+
+func (controller *Controller) GetLevelSenosrCount() int {
+	count, _ := controller.getData(code5.GETLEVELSENSORCOUNT)
+	return count
+}
+
+func (controller *Controller) GetLevelSensorMode(index int) types.LevelSensorOperationMode {
+	result, _ := controller.getDataEnum(code5.LEVEL1_PROPS+getOffset(index, 3, 3), func(value int) string {
+		return types.GetSensorMode(value >> 13)
+	})
+	return types.LevelSensorOperationMode(result)
+}
+
+func (controller *Controller) GetLevelName(index int) string {
+	name, _ := controller.getDataText(code5.LEVEL_NAME + getOffset(index, 64, 1))
+	return name
+}
+
+type LevelState struct {
+	WaterMode types.WaterMode
+	Drain     types.CurrentState
+	Fill      types.CurrentState
+	Alarm     types.CurrentState
+}
+
+func (controller *Controller) GetLevelSensorState(index int) LevelState {
+	// 7654 3210
+	// AFDW WWWR
+	// A - Alarm
+	// F - Fill
+	// D - Drain
+	// W - Water State
+	// R - Reserverd
+	var levelState LevelState
+	state, _ := controller.getData(code5.LEVEL1_ACTSTATE + getOffset(index, 3, 1))
+	state >>= 1
+	levelState.WaterMode = types.GetWaterMode(state & 0xf)
+	state >>= 4
+	levelState.Drain = types.GetCurrentState(state & 0x1)
+	state >>= 1
+	levelState.Fill = types.GetCurrentState(state & 0x1)
+	state >>= 1
+	levelState.Alarm = types.GetCurrentState(state & 0x1)
+
+	return levelState
+}
+
+func (controller *Controller) GetLevelSource1(index int) int {
+	result, _ := controller.getData(code5.LEVEL1_SOURCES + getOffset(index, 3, 3))
+	return result & 0xf
+
+}
+
+func (controller *Controller) GetLevelSource2(index int) int {
+	result, _ := controller.getData(code5.LEVEL1_SOURCES + getOffset(index, 3, 3))
+	result >>= 4
+	return result & 0xf
+}
+
+type LevelInputState struct {
+	Delayed   types.CurrentState
+	Previous  types.CurrentState
+	Undelayed types.CurrentState
+}
+
+func (controller *Controller) GetLevelSensorCurrentState(index int) LevelInputState {
+	// 7654 3210
+	// UPDR RRRR
+	// U - undelayed
+	// P-  Previous
+	// D - Delayed
+	// R - Reserverd
+	var levelState LevelInputState
+	state, _ := controller.getData(code5.LEVEL1_INPUT_STATE + getOffset(index, 4, 1))
+	state >>= 5
+	levelState.Delayed = types.GetCurrentState(state & 0x1)
+	state >>= 1
+	levelState.Previous = types.GetCurrentState(state & 0x1)
+	state >>= 1
+	levelState.Undelayed = types.GetCurrentState(state & 0x1)
+
+	return levelState
+}
+
 // endregion

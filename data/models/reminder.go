@@ -7,7 +7,6 @@ import (
 
 type Reminder struct {
 	IsOverdue   bool
-	SentMail    bool
 	Next        time.Time
 	Text        string
 	Index       int
@@ -22,13 +21,7 @@ func NewReminder(index int) *Reminder {
 }
 
 func (reminder *Reminder) Update(controller *profilux.Controller) {
-	nextReminder := controller.GetReminderNext(reminder.Index)
-
-	if reminder.Next != nextReminder {
-		reminder.SentMail = false
-	}
-
-	reminder.Next = nextReminder
+	reminder.Next = controller.GetReminderNext(reminder.Index)
 	reminder.IsOverdue = reminder.Next.After(time.Now())
 	reminder.Text = controller.GetReminderText(reminder.Index)
 	reminder.Period = controller.GetReminderPeriod(reminder.Index)

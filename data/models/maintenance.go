@@ -24,9 +24,5 @@ func (maintenance *Maintenance) Update(controller *profilux.Controller) {
 	maintenance.IsActive = controller.IsMaintenanceActive(maintenance.Index)
 	maintenance.Duration = controller.GetMaintenanceDuration(maintenance.Index)
 	maintenance.TimeLeft = controller.GetMaintenanceTimeLeft(maintenance.Index)
-
-	name := controller.GetMaintenanceText(maintenance.Index)
-	if len(name) != 0 {
-		maintenance.DisplayName = name
-	}
+	maintenance.DisplayName = controller.GetMaintenanceText(maintenance.Index)
 }
