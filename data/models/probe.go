@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/cjburchell/reefstatus-go/common"
 	"github.com/cjburchell/reefstatus-go/profilux"
 	"github.com/cjburchell/reefstatus-go/profilux/types"
@@ -8,7 +9,6 @@ import (
 
 type Probe struct {
 	SensorInfo
-
 	NominalValue   float64
 	SensorMode     types.SensorMode
 	AlarmEnable    bool
@@ -39,19 +39,60 @@ func (probe *Probe) setAlarmDeviation(value float64) {
 	probe.MinRange = probe.convertValue(probe.NominalValue - probe.AlarmDeviation)
 }
 
+func (probe Probe) getUnits() string {
+	switch probe.SensorType {
+	case types.SensorTypeLevel:
+		return "State"
+	case types.SensorTypePH:
+		return "PH"
+	case types.SensorTypeAirTemperature:
+		if probe.Format == 1 {
+			return "°F"
+		} else {
+			return "°C"
+		}
+	case types.SensorTypeTemperature:
+		if probe.Format == 1 {
+			return "°F"
+		} else {
+			return "°C"
+		}
+	case types.SensorTypeConductivityF:
+		return "μS"
+	case types.SensorTypeConductivity:
+		if probe.Format == 1 {
+			return "ppt/PSU"
+		} else if probe.Format == 2 {
+			return "SG"
+		} else {
+			return "mS"
+		}
+	case types.SensorTypeRedox:
+		return "mV"
+	case types.SensorTypeOxygen:
+		return "%"
+	case types.SensorTypeHumidity:
+		return "%"
+	case types.SensorTypeVoltage:
+		return "V"
+	}
+
+	return ""
+}
+
 func (probe Probe) convertValue(value float64) float64 {
 	digits := probe.getDigits()
 	switch probe.SensorType {
 	case types.SensorTypeAirTemperature:
-	case types.SensorTypeTemperature:
-		{
-			if probe.Format == 1 {
-				// convert temperature to Fahrenheit
-				return common.Round(1.8*value+32.0, digits)
-			}
+		if probe.Format == 1 {
+			// convert temperature to Fahrenheit
+			return common.Round(1.8*value+32.0, digits)
 		}
-		break
-
+	case types.SensorTypeTemperature:
+		if probe.Format == 1 {
+			// convert temperature to Fahrenheit
+			return common.Round(1.8*value+32.0, digits)
+		}
 	case types.SensorTypeConductivity:
 		if probe.Format == 1 {
 			return common.Round(convertToSalinity(value), digits)
@@ -60,7 +101,6 @@ func (probe Probe) convertValue(value float64) float64 {
 		if probe.Format == 2 {
 			return common.Round(convertToSg(value, false), digits)
 		}
-		break
 	}
 
 	return common.Round(value, digits)
@@ -71,6 +111,7 @@ func (probe Probe) getValueMultiplier() float64 {
 	case types.SensorTypePH:
 		return 0.01
 	case types.SensorTypeAirTemperature:
+		return 0.1
 	case types.SensorTypeTemperature:
 		return 0.1
 	case types.SensorTypeConductivityF:
@@ -78,6 +119,7 @@ func (probe Probe) getValueMultiplier() float64 {
 	case types.SensorTypeConductivity:
 		return 0.1
 	case types.SensorTypeOxygen:
+		return 0.1
 	case types.SensorTypeHumidity:
 		return 0.1
 	}
@@ -87,14 +129,17 @@ func (probe Probe) getValueMultiplier() float64 {
 func (probe Probe) getDigits() int {
 	switch probe.SensorType {
 	case types.SensorTypePH:
+		return 2
 	case types.SensorTypeAirTemperature:
+		return 2
 	case types.SensorTypeTemperature:
+		return 2
 	case types.SensorTypeConductivityF:
+		return 2
 	case types.SensorTypeOxygen:
+		return 2
 	case types.SensorTypeHumidity:
-		{
-			return 2
-		}
+		return 2
 	case types.SensorTypeConductivity:
 		if probe.Format == 1 {
 			return 2
@@ -241,9 +286,39 @@ func NewProbe(index int) *Probe {
 	return &probe
 }
 
+var sensorIds = make(map[int]string)
+var sensorCount = map[types.SensorType]int{
+	types.SensorTypeNone:           0,
+	types.SensorTypeTemperature:    0,
+	types.SensorTypePH:             0,
+	types.SensorTypeRedox:          0,
+	types.SensorTypeConductivityF:  0,
+	types.SensorTypeConductivity:   0,
+	types.SensorTypeFree:           0,
+	types.SensorTypeHumidity:       0,
+	types.SensorTypeAirTemperature: 0,
+	types.SensorTypeOxygen:         0,
+	types.SensorTypeVoltage:        0,
+}
+
+func getSensorId(index int, sensorType types.SensorType) string {
+	id, found := sensorIds[index]
+	if !found {
+		sensorCount[sensorType]++
+		id = fmt.Sprintf("%s%d", sensorType, sensorCount[sensorType])
+		sensorIds[index] = id
+	}
+
+	return id
+}
+
 func (probe *Probe) Update(controller *profilux.Controller) {
 	probe.SensorType = controller.GetSensorType(probe.Index)
 	probe.SensorMode = controller.GetSensorMode(probe.Index)
+	probe.Format = controller.GetSensorFormat(probe.Index)
+	probe.Id = getSensorId(probe.Index, probe.SensorType)
+
+	probe.Units = probe.getUnits()
 	probe.DisplayName = controller.GetProbeName(probe.Index)
 	probe.setNominalValue(controller.GetSensorNominalValue(probe.Index, probe.getValueMultiplier()))
 	probe.setAlarmDeviation(controller.GetSensorAlarmDeviation(probe.Index, probe.getValueMultiplier()))

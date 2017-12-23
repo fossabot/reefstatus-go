@@ -1,11 +1,14 @@
 package models
 
-import "github.com/cjburchell/reefstatus-go/profilux/types"
+import (
+	"github.com/cjburchell/reefstatus-go/profilux"
+	"github.com/cjburchell/reefstatus-go/profilux/types"
+)
 
 type DeviceInfo struct {
 	BaseInfo
 	PortNumber int
-	Mode       PortMode
+	Mode       profilux.PortMode
 }
 
 func (info DeviceInfo) IsConstant() bool {

@@ -1,7 +1,7 @@
 package models
 
 type BaseInfo struct {
-	ID          string
+	Id          string
 	Type        string
 	DisplayName string
 	Units       string

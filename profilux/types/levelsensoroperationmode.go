@@ -3,14 +3,14 @@ package types
 type LevelSensorOperationMode string
 
 const (
-	LevelSensorNotEnabled               = "Not Enabled"
-	LevelSensorAutoTopOff               = "Auto Top Off"
-	LevelSensorMinMaxControl            = "Min-Max Control"
-	LevelSensorWaterChange              = "Water Change"
-	LevelSensorLeakageDetection         = "Leakage Detection"
-	LevelSensorWaterChangeAndAutoTopOff = "Water Change and Auto Top Off"
-	LevelSensorAutoTopOffWith2Sensors   = "Auto Top Off With 2 Sensors"
-	LevelSensorReturnPump               = "Return Pump"
+	LevelSensorNotEnabled               = "NotEnabled"
+	LevelSensorAutoTopOff               = "AutoTopOff"
+	LevelSensorMinMaxControl            = "MinMaxControl"
+	LevelSensorWaterChange              = "WaterChange"
+	LevelSensorLeakageDetection         = "LeakageDetection"
+	LevelSensorWaterChangeAndAutoTopOff = "WaterChangeAndAutoTopOff"
+	LevelSensorAutoTopOffWith2Sensors   = "AutoTopOffWith2Sensors"
+	LevelSensorReturnPump               = "ReturnPump"
 )
 
 var levelSensorOperationModeMap = map[int]string{

@@ -1,0 +1,23 @@
+﻿<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+    <div ng-class="sensor.AlarmState | stateToPannel">
+        <div class="panel-heading"><img ng-if="sensor.Icon1" ng-src="{{sensor.Icon1}}" height="32" width="32" /><img ng-if="sensor.Icon2" ng-src="{{sensor.Icon2}}" height="32" width="32" />{{ sensor.DisplayName }}</div>
+        <div class="panel-body">
+            <h3 ng-if="!sensor.HasTwoInputs" style="margin: 0px; text-align: center">{{ sensor.Value }}</h3>
+            <h3 ng-if="sensor.HasTwoInputs" style="margin: 0px; text-align: center">1:{{ sensor.Value }} 2:{{ sensor.SecondSensor }}</h3>
+
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <div ng-if="sensor.HasWaterChange">
+                        <button ng-if="sensor.WaterMode === 'Ready'" type="button" class="btn btn-default btn-sm" ng-click="sensor.startWaterChange()"><img src="icons/water_change.svg" height="32" width="32" /> Water Change</button>
+                        <h5 ng-if="sensor.WaterMode !== 'Ready'">Water Change: {{ sensor.WaterMode }}</h5>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <button ng-if="sensor.AlarmState === 'On'" type="button" class="btn btn-default btn-sm" ng-click="sensor.clearAlarm()" style="float: right">Clear</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

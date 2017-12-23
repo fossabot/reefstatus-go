@@ -1,0 +1,24 @@
+﻿
+<div  class="panel panel-default">
+    <div class="panel-heading"><img ng-if="item.Icon" ng-src="{{item.Icon}}" height="32" width="32" /><b ng-if="item.PlInvert">(Not) </b>{{item.Item.DisplayName}}</div>
+        
+    <div class="panel-body" ng-if="item.DeviceMode === 'ProgrammableLogic'">
+        <div class="row">
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                <div ng-repeat="item in item.Item.Input_list1">
+                    <div ng-include="'logic.html'"></div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                <b>{{item.Item.Function.LogicMode}}</b>
+            </div>
+            
+            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+                <div ng-repeat="item in item.Item.Input_list2">
+                    <div ng-include="'logic.html'"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

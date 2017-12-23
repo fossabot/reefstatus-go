@@ -5,20 +5,20 @@ type LogicMode string
 const (
 	LogicModeAnd            = "And"
 	LogicModeOr             = "Or"
-	LogicModeInvertAnd      = "Invert And"
-	LogicModeInvertOr       = "Invert Or"
+	LogicModeInvertAnd      = "InvertAnd"
+	LogicModeInvertOr       = "InvertOr"
 	LogicModeInverted       = "Inverted"
 	LogicModeEqual          = "Equal"
-	LogicModeNoEqual        = "Not Equal"
+	LogicModeNoEqual        = "NoEqual"
 	LogicModePulse          = "Pulse"
-	LogicModeDelayedOn      = "Delayed On"
-	LogicModeDelayedOff     = "Delayed Off"
-	LogicModeFrequentPulses = "Frequent Pulses"
-	LogicModeSRFlipFlop     = "SR Flip-Flop"
-	LogicModeExclusiveOr    = "Exclusive Or"
+	LogicModeDelayedOn      = "DelayedOn"
+	LogicModeDelayedOff     = "DelayedOff"
+	LogicModeFrequentPulses = "FrequentPulses"
+	LogicModeSRFlipFlop     = "SRFlipFlop"
+	LogicModeExclusiveOr    = "ExclusiveOr"
 )
 
-var logicModeMap = map[int]string{
+var logicModeMap = map[int]LogicMode{
 	0:  LogicModeAnd,
 	1:  LogicModeOr,
 	2:  LogicModeInvertAnd,
@@ -34,7 +34,7 @@ var logicModeMap = map[int]string{
 	12: LogicModeExclusiveOr,
 }
 
-func GetLogicMode(value int) string {
+func GetLogicMode(value int) LogicMode {
 	if val, ok := logicModeMap[value]; ok {
 		return val
 	}

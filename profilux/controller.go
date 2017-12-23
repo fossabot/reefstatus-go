@@ -30,12 +30,29 @@ const (
 	SfWaterchange                 = 0
 )
 
+type iProtocol interface {
+	SendData(code, data int) error
+	GetDataText(code int) (string, error)
+	GetData(code int) (int, error)
+	Disconnect()
+}
+
 func getOffset(index, blockCount, blockSize int) int {
 	return ((index % blockCount) * blockSize) + ((index / blockCount) * MegablockSize)
 }
 
 type Controller struct {
-	p iProtocol
+	p                 iProtocol
+	reminderCount     *int
+	sensorCount       *int
+	levelSensorCount  *int
+	digitalInputCount *int
+	timerCount        *int
+	lightCount        *int
+	pumpCount         *int
+	logicCount        *int
+	sPortCount        *int
+	lPortCount        *int
 }
 
 func NewController(settings ConnectionSettings) (*Controller, error) {
@@ -140,6 +157,15 @@ func (controller *Controller) getDataBool(code int) (bool, error) {
 	return result != 0, nil
 }
 
+func (controller *Controller) getDataBoolConvert(code int, convert func(int) int) (bool, error) {
+	result, err := controller.p.GetData(code)
+	if err != nil {
+		return false, err
+	}
+
+	return convert(result) != 0, nil
+}
+
 func (controller *Controller) getDataFloatAndRound(code int, multiplier float64, digits int) (float64, error) {
 	result, err := controller.getDataFloat(code, multiplier)
 	if err != nil {
@@ -208,8 +234,13 @@ func (controller *Controller) GetOperationMode() types.OperationMode {
 // region Reminders
 
 func (controller *Controller) GetReminderCount() int {
-	count, _ := controller.getData(code5.GETREMINDERCOUNT)
-	return count
+
+	if controller.reminderCount == nil {
+		count, _ := controller.getData(code5.GETREMINDERCOUNT)
+		controller.reminderCount = &count
+	}
+
+	return *controller.reminderCount
 }
 
 func (controller *Controller) IsReminderActive(index int) bool {
@@ -271,12 +302,17 @@ func getSensorOffset(index int) int {
 }
 
 func (controller *Controller) GetSensorCount() int {
-	count, _ := controller.getData(code5.GETSENSORCOUNT)
-	return count
+
+	if controller.sensorCount == nil {
+		count, _ := controller.getData(code5.GETSENSORCOUNT)
+		controller.sensorCount = &count
+	}
+
+	return *controller.sensorCount
 }
 
 func (controller *Controller) GetSensorType(index int) types.SensorType {
-	result, _ := controller.getDataEnum(code5.GETSENSORCOUNT+getSensorOffset(index), types.GetSensorType)
+	result, _ := controller.getDataEnum(code5.SENSORPARA1_SENSORTYPE+getSensorOffset(index), types.GetSensorType)
 	return types.SensorType(result)
 }
 
@@ -329,18 +365,28 @@ func (controller *Controller) GetProbeOperationHours(index int) int {
 	return result
 }
 
+func (controller *Controller) GetSensorFormat(index int) int {
+	result, _ := controller.getData(code5.SENSORPARA1_DISPLAYMODE + getSensorOffset(index))
+	return result & 0x0f
+}
+
 // endregion
 
 // region LevelSensor
 
 func (controller *Controller) GetLevelSenosrCount() int {
-	count, _ := controller.getData(code5.GETLEVELSENSORCOUNT)
-	return count
+	if controller.levelSensorCount == nil {
+		count, _ := controller.getData(code5.GETLEVELSENSORCOUNT)
+		controller.levelSensorCount = &count
+	}
+
+	return *controller.levelSensorCount
 }
 
 func (controller *Controller) GetLevelSensorMode(index int) types.LevelSensorOperationMode {
 	result, _ := controller.getDataEnum(code5.LEVEL1_PROPS+getOffset(index, 3, 3), func(value int) string {
-		return types.GetSensorMode(value >> 13)
+
+		return types.GetLevelSensorOperationMode(value >> 13)
 	})
 	return types.LevelSensorOperationMode(result)
 }
@@ -414,6 +460,317 @@ func (controller *Controller) GetLevelSensorCurrentState(index int) LevelInputSt
 	levelState.Undelayed = types.GetCurrentState(state & 0x1)
 
 	return levelState
+}
+
+// endregion
+
+// region DigitalInput
+func (controller *Controller) GetDigitalInputCount() int {
+
+	if controller.digitalInputCount == nil {
+		count, _ := controller.getData(code5.GETDIGITALINPUTCOUNT)
+		controller.digitalInputCount = &count
+	}
+
+	return *controller.digitalInputCount
+}
+
+func (controller *Controller) GetDigitalInputFunction(index int) types.DigitalInputFunction {
+	result, _ := controller.getDataEnum(code5.DIGITALINPUT1_FUNCTION+getOffset(index, 4, 1), types.GetDigitalInputFunction)
+	return types.DigitalInputFunction(result)
+}
+
+func (controller *Controller) GetDigitalInputState(index int) types.CurrentState {
+	state, _ := controller.getData(code5.DIGITALINPUTSSTATE + getOffset(index, 4, 0))
+	switch index % 4 {
+	case 0:
+		return types.GetCurrentState(state % 0x1)
+	case 1:
+		return types.GetCurrentState(state % 0x2)
+	case 2:
+		return types.GetCurrentState(state % 0x4)
+	case 3:
+		return types.GetCurrentState(state % 0x8)
+	}
+
+	return types.CurrentStateOff
+}
+
+// endregion
+
+// region Timer
+
+func (controller *Controller) GetTimerCount() int {
+
+	if controller.timerCount == nil {
+		count, _ := controller.getData(code5.GETTIMERCOUNT)
+		controller.timerCount = &count
+	}
+
+	return *controller.timerCount
+}
+
+type TimerSettings struct {
+	FeedPauseIfActive bool
+	Mode              types.TimerMode
+	DayMode           types.DayMode
+	SwitchingCount    int
+}
+
+func (controller *Controller) GetTimerSettings(index int) TimerSettings {
+	config, _ := controller.getData(code5.TIMER1_PROPS + getOffset(index, 12, 21))
+
+	settings := TimerSettings{
+		Mode:              types.GetTimerMode((config >> 7) & 0x7),
+		SwitchingCount:    config >> 11,
+		FeedPauseIfActive: (config & 0x10) != 0,
+		DayMode:           types.GetDayMode((config >> 10) & 0x1),
+	}
+
+	return settings
+}
+
+func (controller *Controller) GetDosingRate(index int) int {
+	result, _ := controller.getData(code5.TIMER1_RATEPERDOSING + getOffset(index, 12, 21))
+	return result
+}
+
+// endregion
+
+// region Light
+func (controller *Controller) GetLightCount() int {
+	if controller.lightCount == nil {
+		count, _ := controller.getData(code5.GETILLUMINATIONCOUNT)
+		controller.lightCount = &count
+	}
+
+	return *controller.lightCount
+}
+
+func (controller *Controller) GetIsLightActive(index int) bool {
+	result, _ := controller.getDataBoolConvert(code5.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
+		return (config >> 4) & 0xF
+	})
+	return result
+}
+func (controller *Controller) GetIsLightDimmable(index int) bool {
+	result, _ := controller.getDataBoolConvert(code5.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
+		return config & 0x8
+	})
+	return result
+}
+func (controller *Controller) GetLightOperationHours(index int) int {
+	result, _ := controller.getData(code5.ILLUMINATION1_OHM + getOffset(index, 8, 4))
+	return result
+}
+func (controller *Controller) GetLightValue(index int) float64 {
+	result, _ := controller.getDataFloat(code5.ILLUMINATION1_ACTPERCENT+getOffset(index, 8, 4), 1)
+	return result
+}
+func (controller *Controller) GetLightName(index int) string {
+	result, _ := controller.getDataText(code5.ILLUMINATION1_NAME + getOffset(index, 32, 1))
+	return result
+}
+
+// endregion
+
+// region Pumps
+
+func (controller *Controller) GetCurrentPumpCount() int {
+
+	if controller.pumpCount == nil {
+		count, _ := controller.getData(code5.GETCURRENTPUMPCOUNT)
+		controller.pumpCount = &count
+	}
+
+	return *controller.pumpCount
+}
+
+func (controller *Controller) GetIsCurrentPumpAssigned(index int) bool {
+	group1Mask, _ := controller.getData(code5.CURRENTCONTROL_GROUP1PUMPCOUNT)
+	i := uint(index)
+	if (group1Mask >> i & 0x1) == 1 {
+		return true
+	}
+
+	group2Mask, _ := controller.getData(code5.CURRENTCONTROL_GROUP2PUMPCOUNT)
+	if (group2Mask >> i & 0x1) == 1 {
+		return true
+	}
+
+	return false
+}
+
+func (controller *Controller) GetCurrentPumpValue(index int) int {
+	result, _ := controller.getData(code5.CURRENTPUMP1_ACTPERCENT + getOffset(index, 4, 1))
+	return result
+}
+
+// endregion
+
+// region ProgrammableLogic
+func (controller *Controller) GetProgrammableLogicCount() int {
+
+	if controller.logicCount == nil {
+		count, _ := controller.getData(code5.GETPROGLOGICCOUNT)
+		controller.logicCount = &count
+	}
+
+	return *controller.logicCount
+}
+
+func (controller *Controller) GetProgramLogicInput(input, index int) PortMode {
+	mode, _ := controller.getData(code5.PROGLOGIC1_INPUT1 + input + getOffset(index, 8, 4))
+	// mode format
+	// 1234 1234 1234 1234
+	// RRRR RRPP PPPT TTTT
+	// R = Reserved
+	// P = Port Number
+	// T = Type
+	var portMode PortMode
+	mode >>= 6
+	portMode.Port = (mode & 0x1F) + 1
+	mode >>= 5
+	portMode.DeviceMode = types.GetDeviceMode(mode & 0x1F)
+	portMode.IsProbe = getIsProbe(portMode.DeviceMode)
+	return portMode
+}
+
+type LogicFunction struct {
+	Invert1   bool
+	Invert2   bool
+	LogicMode types.LogicMode
+}
+
+func (controller *Controller) GetProgramLogicFunction(index int) LogicFunction {
+	mode, _ := controller.getData(code5.PROGLOGIC1_FUNCTION + getOffset(index, 8, 4))
+
+	// mode format
+	// 1234 1234
+	// RRMM MMMM
+	// R = Reserved
+	// P = Port Number
+	// T = Type
+	var function LogicFunction
+	function.Invert2 = (mode & 0x1) == 1
+	mode >>= 1
+	function.Invert1 = (mode & 0x1) == 1
+	mode >>= 1
+	function.LogicMode = types.GetLogicMode(mode & 0x3F)
+
+	return function
+}
+
+// endregion
+
+// region sport
+
+func (controller *Controller) GetSPortCount() int {
+
+	if controller.sPortCount == nil {
+		count, _ := controller.getData(code5.GETSWITCHCOUNT)
+		controller.sPortCount = &count
+	}
+
+	return *controller.sPortCount
+}
+
+type PortMode struct {
+	DeviceMode types.DeviceMode
+	Port       int
+	BlackOut   int
+	Invert     bool
+	Id         string
+	IsProbe    bool
+}
+
+func getIsProbe(mode types.DeviceMode) bool {
+	return mode == types.DeviceModeDecrease ||
+		mode == types.DeviceModeIncrease ||
+		mode == types.DeviceModeSubstrate ||
+		mode == types.DeviceModeProbeAlarm
+}
+
+func (controller *Controller) GetSPortFunction(index int) PortMode {
+	mode, _ := controller.getData(code5.SWITCHPLUG1_FUNCTION + getOffset(index, 24, 1))
+
+	// mode format
+	// 1234 1234 1234 1234
+	// IBBB BBPP PPPT TTTT
+	// I = Invert
+	// B = Blackout time
+	// P = Port Number
+	// T = Type
+	var portMode PortMode
+	portMode.Invert = (mode & 0x01) != 0
+	mode >>= 1
+	portMode.BlackOut = mode & 0x1F
+	mode >>= 5
+	portMode.Port = (mode & 0x1F) + 1
+	mode >>= 5
+	portMode.DeviceMode = types.GetDeviceMode(mode & 0x1F)
+	portMode.IsProbe = getIsProbe(portMode.DeviceMode)
+	return portMode
+}
+
+func (controller *Controller) GetSPortValue(index int) types.CurrentState {
+	value, _ := controller.getDataCurrentState(code5.SP1_STATE + getOffset(index, 24, 1))
+	return value
+}
+
+func (controller *Controller) GetSPortName(index int) string {
+	result, _ := controller.getDataText(code5.SWITCHPLUG1_NAME + getOffset(index, 64, 1))
+	return result
+}
+
+// endregion
+
+// region lport
+
+func (controller *Controller) GetLPortCount() int {
+
+	if controller.lPortCount == nil {
+		count, _ := controller.getData(code5.GETONTETOTENVINTCOUNT)
+		controller.lPortCount = &count
+	}
+
+	return *controller.lPortCount
+}
+
+func (controller *Controller) GetLPortFunction(index int) PortMode {
+	mode, _ := controller.getData(code5.L1TO10VINT1_FUNCTION + getOffset(index, 10, 3))
+
+	// mode format
+	// 1234 1234
+	// PPPT TTTT
+	// I = Invert
+	// B = Blackout time
+	// P = Port Number
+	// T = Type
+	var portMode PortMode
+	portMode.BlackOut = mode & 0x003F
+	mode >>= 6
+	portMode.Port = (mode & 0x001F) + 1
+	mode >>= 5
+	portMode.DeviceMode = types.LPortModeToSocketType(mode & 0x003F)
+	portMode.IsProbe = getIsProbe(portMode.DeviceMode)
+	return portMode
+}
+
+const (
+	LValueMin = 18.0
+	LValueMax = 255.00
+)
+
+func (controller *Controller) GetLPortValue(index int) float64 {
+
+	value, _ := controller.getData(code5.L1TO10VINT1_PWMVALUE + getOffset(index, 10, 1))
+
+	if value < LValueMin {
+		return 0
+	} else {
+		return (float64(value) - LValueMin) / (LValueMax - LValueMin) * 100.0
+	}
 }
 
 // endregion

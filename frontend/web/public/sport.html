@@ -1,0 +1,15 @@
+﻿<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+    <div class="panel panel-default">
+        <div class="panel-heading"><img ng-if="port.Mode.Icon" ng-src="{{port.Mode.Icon}}" height="32" width="32" />S{{port.PortNumber}} {{port.DisplayName}}</div>
+        <div class="panel-body">
+            <div class="row">
+                    <h3 ng-if="port.Mode.DeviceMode !== 'ProgrammableLogic'" style="margin: 0px; text-align: center">{{ port.Value }}</h3>
+
+                <a ng-if="port.Mode.DeviceMode === 'ProgrammableLogic'" href="#" ng-click="port.showLogic()" data-toggle="modal" data-target="#logicDialog">
+                    <h3 style="margin: 0px; text-align: center">{{ port.Value }}</h3>
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>

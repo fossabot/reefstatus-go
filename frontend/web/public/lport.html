@@ -1,0 +1,9 @@
+﻿<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+    <div class="panel panel-default">
+        <div class="panel-heading"><img ng-if="port.Mode.Icon" ng-src="{{port.Mode.Icon}}" height="32" width="32" /> {{port.DisplayName}}</div>
+        <div class="panel-body">
+            <h5>Output {{ port.Value }}{{port.DefaultUnits}}</h5>
+            <h5>{{ port.Mode.Item.DisplayName }} {{port.Mode.ValueString}}</h5>
+        </div>
+    </div>
+</div>

@@ -3,27 +3,34 @@ package types
 type DigitalInputFunction string
 
 const (
-	DigitalInputFunctionNotUsed      = "Not Used"
-	DigitalInputFunctionLevelSensor  = "Level Sensor"
-	DigitalInputFunctionWaterChange  = "Water Change"
+	DigitalInputFunctionNotUsed      = "NotUsed"
+	DigitalInputFunctionLevelSensor  = "LevelSensor"
+	DigitalInputFunctionWaterChange  = "WaterChange"
 	DigitalInputFunctionMaintenance  = "Maintenance"
-	DigitalInputFunctionFeedingPause = "Feeding Pause"
+	DigitalInputFunctionFeedingPause = "FeedingPause"
 	DigitalInputFunctionThunderstorm = "Thunderstorm"
 )
 
-var digitalInputFunctionMap = map[int]string{
-	0: DigitalInputFunctionNotUsed,
-	1: DigitalInputFunctionLevelSensor,
-	2: DigitalInputFunctionWaterChange,
-	3: DigitalInputFunctionMaintenance,
-	4: DigitalInputFunctionFeedingPause,
-	5: DigitalInputFunctionThunderstorm,
-}
-
 func GetDigitalInputFunction(value int) string {
-	if val, ok := digitalInputFunctionMap[value]; ok {
-		return val
+
+	function := (value >> 4) & 0xF
+	def := value & 0xF
+
+	switch function {
+	case 1:
+		return DigitalInputFunctionLevelSensor
+	case 2:
+		switch def {
+		case 0:
+			return DigitalInputFunctionWaterChange
+		case 1:
+			return DigitalInputFunctionMaintenance
+		case 2:
+			return DigitalInputFunctionFeedingPause
+		case 3:
+			return DigitalInputFunctionThunderstorm
+		}
 	}
 
-	return "Unknown"
+	return DigitalInputFunctionNotUsed
 }

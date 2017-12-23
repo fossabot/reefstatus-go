@@ -1,8 +1,8 @@
 package models
 
-const (
-	LValueMin = 18.0
-	LValueMax = 255.00
+import (
+	"fmt"
+	"github.com/cjburchell/reefstatus-go/profilux"
 )
 
 type LPort struct {
@@ -10,17 +10,16 @@ type LPort struct {
 	Value float64
 }
 
-func (lport *LPort) SetValue(value int) {
-	if value < LValueMin {
-		lport.Value = 0
-	} else {
-		lport.Value = (float64(value) - LValueMin) / (LValueMax - LValueMin) * 100.0
-	}
-}
-
-func NewLPort() *LPort {
+func NewLPort(index int) *LPort {
 	var lPort LPort
 	lPort.Type = "LPort"
 	lPort.Units = "%"
+	lPort.PortNumber = index
+	lPort.Id = fmt.Sprintf("L%d", 1+index)
 	return &lPort
+}
+
+func (port *LPort) Update(controller *profilux.Controller) {
+	port.Mode = controller.GetLPortFunction(port.PortNumber)
+	port.Value = controller.GetLPortValue(port.PortNumber)
 }

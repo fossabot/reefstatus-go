@@ -3,16 +3,16 @@ package types
 type DayMode string
 
 const (
-	DayModeDaysOfWeek  = "Days of the Week"
+	DayModeDaysOfWeek  = "DaysOfWeek"
 	DayModeDayInterval = "Interval"
 )
 
-var dayModeMap = map[int]string{
+var dayModeMap = map[int]DayMode{
 	0: DayModeDaysOfWeek,
 	1: DayModeDayInterval,
 }
 
-func GetDayMode(value int) string {
+func GetDayMode(value int) DayMode {
 	if val, ok := dayModeMap[value]; ok {
 		return val
 	}

@@ -22,6 +22,14 @@ type Info struct {
 	Reminders       map[int]*Reminder
 }
 
+func NewInfo() *Info {
+	var info Info
+	info.Maintenance = make(map[int]*Maintenance)
+	info.Reminders = make(map[int]*Reminder)
+
+	return &info
+}
+
 func (info Info) IsP3() bool {
 	return info.Model == types.ProfiLuxIII || info.Model == types.ProfiLuxIIIEx
 }

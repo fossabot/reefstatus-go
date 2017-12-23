@@ -7,7 +7,7 @@ const (
 	SensorTypeTemperature    = "Temperature"
 	SensorTypePH             = "PH"
 	SensorTypeRedox          = "Redox"
-	SensorTypeConductivityF  = "Freshwater Conductivity"
+	SensorTypeConductivityF  = "FreshwaterConductivity"
 	SensorTypeConductivity   = "Conductivity"
 	SensorTypeFree           = "Free"
 	SensorTypeHumidity       = "Humidity"
@@ -15,7 +15,7 @@ const (
 	SensorTypeOxygen         = "Oxygen"
 	SensorTypeVoltage        = "Voltage"
 	SensorTypeLevel          = "Level"
-	SensorTypeDigitalInput   = "Digital Input"
+	SensorTypeDigitalInput   = "DigitalInput"
 )
 
 var sensorTypeMap = map[int]string{

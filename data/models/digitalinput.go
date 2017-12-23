@@ -1,6 +1,10 @@
 package models
 
-import "github.com/cjburchell/reefstatus-go/profilux/types"
+import (
+	"fmt"
+	"github.com/cjburchell/reefstatus-go/profilux"
+	"github.com/cjburchell/reefstatus-go/profilux/types"
+)
 
 type DigitalInput struct {
 	SensorInfo
@@ -8,10 +12,18 @@ type DigitalInput struct {
 	Function types.DigitalInputFunction
 }
 
-func NewDigitalInput() *DigitalInput {
+func NewDigitalInput(index int) *DigitalInput {
 	var digitalInput DigitalInput
+	digitalInput.Index = index
 	digitalInput.Type = "DigitalInput"
 	digitalInput.SensorType = types.SensorTypeDigitalInput
 	digitalInput.Units = "State"
+	digitalInput.Id = fmt.Sprintf("DigitalInput%d", 1+index)
+
 	return &digitalInput
+}
+
+func (sensor *DigitalInput) Update(controller *profilux.Controller) {
+	sensor.Function = controller.GetDigitalInputFunction(sensor.Index)
+	sensor.Value = controller.GetDigitalInputState(sensor.Index)
 }

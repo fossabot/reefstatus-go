@@ -1,0 +1,11 @@
+﻿<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+    <a href="#" ng-click="probe.showGraph('week')" data-toggle="modal" data-target="#graphDialog">
+        <div ng-class="probe.AlarmState | stateToPannel">
+            <div class="panel-heading">{{ probe.DisplayName }} </div>
+            <div class="panel-body">
+                <h3 style="margin: 0px; text-align: center">{{probe.ConvertedValue}}{{probe.Units}}</h3>
+                <canvas id="{{ probe.Id }}_lineChart" style="max-height: 50px;"></canvas>
+            </div>
+        </div>
+    </a>
+</div>

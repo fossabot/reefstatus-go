@@ -1,13 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cjburchell/reefstatus-go/common/log"
 	"github.com/cjburchell/reefstatus-go/profilux"
 )
 
 func main() {
-	var controller Controller
+	controller := newController()
 	settings := profilux.CreateDefaultConnectionSettings()
 	profiluxController, err := profilux.NewController(settings)
 	if err != nil {
@@ -18,5 +19,6 @@ func main() {
 
 	controller.Update(profiluxController)
 
-	fmt.Printf("%v", controller)
+	result, _ := json.MarshalIndent(controller, "", "    ")
+	fmt.Printf("%s", result)
 }

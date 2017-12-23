@@ -9,9 +9,9 @@ const (
 	OperationModeDiagnostics        = "Diagnostics"
 	OperationModeLightTest          = "LightTest"
 	OperationModeMaintenance        = "Maintenance"
-	OperationModeManualSockets      = "Manual Sockets"
-	OperationModeManualIllumination = "Manual Illumination"
-	OperationModeCanTransparent     = "Can Transparent"
+	OperationModeManualSockets      = "ManualSockets"
+	OperationModeManualIllumination = "ManualIllumination"
+	OperationModeCanTransparent     = "CanTransparent"
 )
 
 var operationModeMap = map[int]string{

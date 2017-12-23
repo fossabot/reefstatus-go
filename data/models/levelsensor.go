@@ -1,18 +1,21 @@
 package models
 
 import (
+	"fmt"
 	"github.com/cjburchell/reefstatus-go/profilux"
 	"github.com/cjburchell/reefstatus-go/profilux/types"
 )
 
 type LevelSensor struct {
 	SensorInfo
-	OperationMode  types.LevelSensorOperationMode
-	Value          types.CurrentState
-	WaterMode      types.WaterMode
-	SecondSensor   types.CurrentState
-	HasTwoInputs   bool
-	HasWaterChange bool
+	OperationMode     types.LevelSensorOperationMode
+	Value             types.CurrentState
+	SensorIndex       int
+	WaterMode         types.WaterMode
+	SecondSensor      types.CurrentState
+	SecondSensorIndex int
+	HasTwoInputs      bool
+	HasWaterChange    bool
 }
 
 func NewLevelSensor(index int) *LevelSensor {
@@ -21,6 +24,7 @@ func NewLevelSensor(index int) *LevelSensor {
 	sensor.Type = "LevelSensor"
 	sensor.SensorType = types.SensorTypeLevel
 	sensor.Units = "State"
+	sensor.Id = fmt.Sprintf("Level%d", 1+index)
 	return &sensor
 }
 
@@ -50,10 +54,12 @@ func (sensor *LevelSensor) Update(controller *profilux.Controller) {
 	source1 := controller.GetLevelSource1(sensor.Index)
 	sensorState := controller.GetLevelSensorCurrentState(source1)
 	sensor.Value = sensorState.Undelayed
+	sensor.SensorIndex = source1
 
 	if sensor.HasTwoInputs {
 		source2 := controller.GetLevelSource2(sensor.Index)
 		sensorState2 := controller.GetLevelSensorCurrentState(source2)
-		sensor.Value = sensorState2.Undelayed
+		sensor.SecondSensor = sensorState2.Undelayed
+		sensor.SecondSensorIndex = source2
 	}
 }
