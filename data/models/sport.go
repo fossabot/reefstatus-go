@@ -27,6 +27,10 @@ func (port *SPort) Update(controller *profilux.Controller) {
 	port.Mode = controller.GetSPortFunction(port.PortNumber)
 	port.Value = controller.GetSPortValue(port.PortNumber)
 	port.IsActive = port.Value == types.CurrentStateOn
-
 	port.DisplayName = controller.GetSPortName(port.PortNumber)
+}
+
+func (port *SPort) UpdateState(controller *profilux.Controller) {
+	port.Value = controller.GetSPortValue(port.PortNumber)
+	port.IsActive = port.Value == types.CurrentStateOn
 }

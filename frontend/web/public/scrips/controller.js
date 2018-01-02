@@ -16,8 +16,8 @@
                     item.reset = function () {
                         $http.post("command/resetReminder/" + item.Index)
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getInfo();
@@ -30,10 +30,10 @@
 
                 controller.info.Maintenance.forEach(function (item) {
                     item.toggle = function () {
-                        $http.post("command/maintenance/" + item.Index, !item.IsActive)
+                        $http.post("command/maintenance/" + item.Index, !item.IsActive, {headers:{'Content-Type': 'application/json'}})
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getInfo();
@@ -323,8 +323,8 @@
                     item.clearAlarm = function () {
                         $http.post("command/clearlevelalarm/" + item.Id)
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getData();
@@ -334,8 +334,8 @@
                     item.startWaterChange = function () {
                         $http.post("command/startwaterchange/" + item.Id)
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getData();
@@ -352,10 +352,10 @@
                 controller.sports = response.data;
                 controller.sports.forEach(function (item) {
                     item.toggle = function () {
-                        $http.post("command/SetSocket/" + item.Id, item.Value !== 'On')
+                        $http.post("command/SetSocket/" + item.Id, item.Value !== 'On', {headers:{'Content-Type': 'application/json'}})
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getData();
@@ -404,10 +404,10 @@
 
                 controller.dosingPumps.forEach(function (item) {
                     item.updateDousingValue = function (perDay, rate) {
-                        $http.put("command/updatedousingvalue/" + item.Id, { PerDay: perDay, Rate: rate })
+                        $http.put("command/updatedousingvalue/" + item.Id, { PerDay: perDay, Rate: rate }, {headers:{'Content-Type': 'application/json'}})
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getData();
@@ -423,10 +423,10 @@
 
                 controller.lights.forEach(function (item) {
                     item.setLight = function (enable) {
-                        $http.post("command/setlight/" + item.Id, enable)
+                        $http.post("command/setlight/" + item.Id, enable, {headers:{'Content-Type': 'application/json'}})
                             .then(function (response) {
-                                if (response.data !== true) {
-                                    alert(response.data);
+                                if (response.status !== 202) {
+                                    alert(response);
                                 }
 
                                 controller.getData();
@@ -439,10 +439,10 @@
     }
 
     this.feedPause = function () {
-        $http.post("command/feedpasue", true)
+        $http.post("command/feedpasue", true, {headers:{'Content-Type': 'application/json'}})
             .then(function (response) {
-                if (response.data !== true) {
-                    alert(response.data);
+                if (response.status !== 202) {
+                    alert(response);
                 }
 
                 controller.getInfo();
@@ -451,10 +451,10 @@
 
     this.manualLights = function () {
         var enable = controller.info.OperationMode !== "ManualIllumination";
-        $http.post("command/manuallights", enable)
+        $http.post("command/manuallights", enable, {headers:{'Content-Type': 'application/json'}})
             .then(function (response) {
-                if (response.data !== true) {
-                    alert(response.data);
+                if (response.status !== 202) {
+                    alert(response);
                 }
 
                 controller.getInfo();
@@ -463,10 +463,10 @@
 
     this.manualSockets = function () {
         var enable = controller.info.OperationMode !== "ManualSockets";
-        $http.post("command/manualSockets", enable)
+        $http.post("command/manualSockets", enable, {headers:{'Content-Type': 'application/json'}})
             .then(function (response) {
-                if (response.data !== true) {
-                    alert(response.data);
+                if (response.status !== 202) {
+                    alert(response);
                 }
 
                 controller.getInfo();
@@ -474,10 +474,10 @@
     }
 
     this.thunderstorm = function () {
-        $http.post("command/thunderstorm", 5)
+        $http.post("command/thunderstorm", 5, {headers:{'Content-Type': 'application/json'}})
             .then(function (response) {
-                if (response.data !== true) {
-                    alert(response.data);
+                if (response.status !== 202) {
+                    alert(response);
                 }
 
                 controller.getInfo();
@@ -485,10 +485,10 @@
     }
 
     this.refresh = function (enable) {
-        $http.post("command/refresh", enable)
+        $http.post("command/refresh", enable, {headers:{'Content-Type': 'application/json'}})
             .then(function (response) {
-                if (response.data !== true) {
-                    alert(response.data);
+                if (response.status !== 202) {
+                    alert(response);
                 }
 
                 controller.getData();

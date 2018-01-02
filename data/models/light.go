@@ -30,3 +30,9 @@ func (light *Light) Update(controller *profilux.Controller) {
 	light.IsLightOn = light.Value != 0
 	light.DisplayName = controller.GetLightName(light.Channel)
 }
+
+func (light *Light) UpdateState(controller *profilux.Controller) {
+	light.OperationHours = controller.GetLightOperationHours(light.Channel)
+	light.Value = controller.GetLightValue(light.Channel)
+	light.IsLightOn = light.Value != 0
+}

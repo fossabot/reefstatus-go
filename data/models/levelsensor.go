@@ -63,3 +63,17 @@ func (sensor *LevelSensor) Update(controller *profilux.Controller) {
 		sensor.SecondSensorIndex = source2
 	}
 }
+
+func (sensor *LevelSensor) UpdateState(controller *profilux.Controller) {
+	state := controller.GetLevelSensorState(sensor.Index)
+	sensor.AlarmState = state.Alarm
+	sensor.WaterMode = state.WaterMode
+
+	sensorState := controller.GetLevelSensorCurrentState(sensor.SensorIndex)
+	sensor.Value = sensorState.Undelayed
+
+	if sensor.HasTwoInputs {
+		sensorState2 := controller.GetLevelSensorCurrentState(sensor.SecondSensorIndex)
+		sensor.SecondSensor = sensorState2.Undelayed
+	}
+}

@@ -21,9 +21,13 @@ func NewReminder(index int) *Reminder {
 }
 
 func (reminder *Reminder) Update(controller *profilux.Controller) {
-	reminder.Next = controller.GetReminderNext(reminder.Index)
-	reminder.IsOverdue = reminder.Next.After(time.Now())
+	reminder.UpdateState(controller)
 	reminder.Text = controller.GetReminderText(reminder.Index)
 	reminder.Period = controller.GetReminderPeriod(reminder.Index)
 	reminder.IsRepeating = controller.GetReminderIsRepeating(reminder.Index)
+}
+
+func (reminder *Reminder) UpdateState(controller *profilux.Controller) {
+	reminder.Next = controller.GetReminderNext(reminder.Index)
+	reminder.IsOverdue = reminder.Next.Before(time.Now())
 }

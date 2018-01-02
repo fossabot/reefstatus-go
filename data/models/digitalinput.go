@@ -27,3 +27,7 @@ func (sensor *DigitalInput) Update(controller *profilux.Controller) {
 	sensor.Function = controller.GetDigitalInputFunction(sensor.Index)
 	sensor.Value = controller.GetDigitalInputState(sensor.Index)
 }
+
+func (sensor *DigitalInput) UpdateState(controller *profilux.Controller) {
+	sensor.Value = controller.GetDigitalInputState(sensor.Index)
+}

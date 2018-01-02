@@ -54,30 +54,57 @@
 
 <body ng-app="myApp" ng-controller="controller">
 
-    <nav class="navbar navbar-inverse" data-spy="affix" data-offset-top="-3" style="z-index: 2">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Reef Status</a>
-            </div>
-            <div class="collapse navbar-collapse" id="myNavbar">
-                <!--<ul class="nav navbar-nav">
-                  <li class="active"><a href="#">Home</a></li>
-                  <li><a href="remote.html">Remote</a></li>
-                </ul>-->
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#" data-toggle="modal" data-target="#optionsDialog"><span class="glyphicon glyphicon-option-horizontal"></span> Options</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-9 col-md-8 col-sm-6 col-xs-12">
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                <div ng-class="controller.info.Alarm | stateToPannel" style="margin-right: 20px">
+                        <div class="panel-heading"><h3>{{controller.info.Model}}</h3></div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Version</b></div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.SoftwareVersion}} {{controller.info.SoftwareDate | date: 'shortDate'}}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Serial Number</b></div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.SerialNumber}}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Last Update</b></div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.LastUpdate | date: 'short'}}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Mode</b></div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.OperationMode}}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Moon Phase</b></div>
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.MoonPhase}}%</div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="btn-group-justified">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <button type="button" class="btn btn-default btn-md btn-block btn_commands" ng-click="controller.feedPause()"><img src="icons/food.svg" height="32" width="32" /> Feed Pause</button>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <button type="button" class="btn btn-default btn-md btn-block btn_commands" ng-click="controller.thunderstorm()"><img src="icons/thunder.svg" height="32" width="32" /> Thunderstorm</button>
+                                    </div>
+                                    <div ng-repeat="item in controller.info.Maintenance | orderBy : 'DisplayName'">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <button type="button" class="btn_commands" ng-class="item.IsActive | toggleButton" ng-click="item.toggle()"><img src="icons/wrench.svg" height="32" width="32" /> {{item.DisplayName}}</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="col-lg-9 col-md-8 col-sm-7 col-xs-12">
                 <div ng-if="controller.probes.length">
                     <h3><a href="#probes" data-toggle="collapse"><img src="icons/thermometer.svg" height="32" width="32" /> Probes</a> <span ng-if="controller.probes.IsAlarm" ng-class="controller.probes.IsAlarm | alarmToBadge">Alarm</span></h3>
                     <div id="probes" class="row collapse">
@@ -143,7 +170,7 @@
                                     <div class="panel-body">
                                         <div data-ng-if="reminder.IsOverdue" class="row">
                                             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                                <h5>{{ reminder.timeLeft * -1}} Days Overdue</h5>
+                                                <h5>{{ reminder.timeLeft*-1}} Days Overdue</h5>
                                                 <h5><b>Due Date</b> {{ reminder.Next | date: 'shortDate'}}</h5>
                                             </div>
 
@@ -163,107 +190,10 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
-                <div data-spy="affix" data-offset-top="-3" style="width: auto; top: 70px">
-                    <div ng-class="controller.info.Alarm | stateToPannel" style="margin-right: 20px">
-                        <div class="panel-heading"><h3>{{controller.info.Model}}</h3></div>
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Version</b></div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.SoftwareVersion}} {{controller.info.SoftwareDate | date: 'shortDate'}}</div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Serial Number</b></div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.SerialNumber}}</div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Last Update</b></div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.LastUpdate | date: 'short'}}</div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Mode</b></div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.OperationMode}}</div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"><b>Moon Phase</b></div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">{{controller.info.MoonPhase}}%</div>
-                            </div>
-                        </div>
-                        <div class="panel-footer">
-                            <div class="btn-group-justified">
-                                <div class="row">
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                        <button type="button" class="btn btn-default btn-md btn-block btn_commands" ng-click="controller.feedPause()"><img src="icons/food.svg" height="32" width="32" /> Feed Pause</button>
-                                    </div>
-                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                        <button type="button" class="btn btn-default btn-md btn-block btn_commands" ng-click="controller.thunderstorm()"><img src="icons/thunder.svg" height="32" width="32" /> Thunderstorm</button>
-                                    </div>
-                                    <div ng-repeat="item in controller.info.Maintenance | orderBy : 'DisplayName'">
-                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                            <button type="button" class="btn_commands" ng-class="item.IsActive | toggleButton" ng-click="item.toggle()"><img src="icons/wrench.svg" height="32" width="32" /> {{item.DisplayName}}</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="optionsDialog" role="dialog">
-        <div class="modal-dialog">
-
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" ng-click="settings.setData()">&times;</button>
-                    <h4 class="modal-title">Options</h4>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a data-toggle="tab" href="#connection">Connection</a></li>
-                        <li><a data-toggle="tab" href="#logging">Logging</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div id="connection" class="tab-pane fade in active">
-                            <h3>Connection</h3>
-                            <div class="form-group">
-                                <label for="usr">Host Address:</label>
-                                <input type="text" class="form-control" ng-model="settings.connection.Address" />
-                            </div>
-                            <div class="form-group">
-                                <label for="usr">Port:</label>
-                                <input type="number" class="form-control" ng-model="settings.connection.Port" />
-                            </div>
-                            <div class="form-group">
-                                <label for="usr">Device Address:</label>
-                                <input type="number" class="form-control" ng-model="settings.connection.ControllerAddress" min="1" max="16" />
-                            </div>
-                        </div>
-                        <div id="logging" class="tab-pane fade">
-                            <h3>Logging</h3>
-                            <div class="form-group">
-                                <label for="usr">Log Every:</label>
-                                <input type="number" class="form-control" ng-model="settings.logging.LogInterval" min="1" max="100" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="settings.setData()">Close</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
     <div class="modal fade" id="logicDialog" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->

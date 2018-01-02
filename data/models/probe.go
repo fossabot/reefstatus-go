@@ -324,7 +324,10 @@ func (probe *Probe) Update(controller *profilux.Controller) {
 	probe.setAlarmDeviation(controller.GetSensorAlarmDeviation(probe.Index, probe.getValueMultiplier()))
 	probe.AlarmEnable = controller.GetSensorAlarmEnable(probe.Index)
 
-	// Volatile data
+	probe.UpdateState(controller)
+}
+
+func (probe *Probe) UpdateState(controller *profilux.Controller) {
 	probe.AlarmState = controller.GetSensorAlarm(probe.Index)
 	probe.setValue(controller.GetSensorValue(probe.Index, probe.getValueMultiplier()))
 	probe.OperationHours = controller.GetProbeOperationHours(probe.Index)

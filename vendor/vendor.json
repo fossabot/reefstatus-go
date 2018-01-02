@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "Vv2xzrpgM+kLyw/XhdO/1p/i5cU=",
+			"path": "github.com/google/uuid",
+			"revision": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+			"revisionTime": "2017-11-29T19:10:14Z"
+		},
+		{
+			"checksumSHA1": "ygXockrx7DYmGK9kAojU/Zvbu6Y=",
+			"path": "github.com/gorilla/mux",
+			"revision": "5ab525f4fb1678e197ae59401e9050fa0b6cb5fd",
+			"revisionTime": "2017-12-08T16:08:15Z"
+		},
+		{
+			"checksumSHA1": "5a1GlQJ5Fc7CNbRw8XYVdGZD5Rk=",
+			"path": "github.com/rhinoman/couchdb-go",
+			"revision": "f2482e23164eaf6ade127514f9a2153d4152b038",
+			"revisionTime": "2017-08-18T01:00:19Z"
+		}
+	],
+	"rootPath": "github.com/cjburchell/reefstatus-go"
+}

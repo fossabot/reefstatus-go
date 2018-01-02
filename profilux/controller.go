@@ -2,47 +2,45 @@ package profilux
 
 import (
 	"github.com/cjburchell/reefstatus-go/common"
+	"github.com/cjburchell/reefstatus-go/common/log"
 	"github.com/cjburchell/reefstatus-go/profilux/code5"
+	"github.com/cjburchell/reefstatus-go/profilux/protocol"
+	"github.com/cjburchell/reefstatus-go/profilux/protocol/http"
+	"github.com/cjburchell/reefstatus-go/profilux/protocol/native"
+	"github.com/cjburchell/reefstatus-go/profilux/settings"
 	"github.com/cjburchell/reefstatus-go/profilux/types"
 	"strconv"
 	"time"
 )
 
 const (
-	Blockitems1To10Vint           = 10
-	BlockitemsIlluminationchannel = 8
-	BlockitemsProglogic           = 8
-	BlockitemsReminder            = 4
-	BlockitemsSensorstates        = 8
-	BlockitemsSwitchplug          = 24
-	BlockitemsTimer               = 12
-	Blocksize1To10Vint            = 3
-	BlocksizeIlluminationchannel  = 28
-	BlocksizeProglogic            = 4
-	BlocksizeReminder             = 12
-	BlocksizeSensorstates         = 8
-	BlocksizeSwitchplug           = 1
-	BlocksizeTimer                = 21
-	MegablockSize                 = 1000
-	SfFeedpause                   = 2
-	SfMaintenance                 = 1
-	SfThunderstorm                = 3
-	SfWaterchange                 = 0
+	//Blockitems1To10Vint           = 10
+	//BlockitemsIlluminationchannel = 8
+	//BlockitemsProglogic           = 8
+	BlockitemsReminder = 4
+	//BlockitemsSensorstates        = 8
+	//BlockitemsSwitchplug          = 24
+	//BlockitemsTimer               = 12
+	//Blocksize1To10Vint            = 3
+	//BlocksizeIlluminationchannel  = 28
+	//BlocksizeProglogic            = 4
+	BlocksizeReminder = 12
+	//BlocksizeSensorstates         = 8
+	//BlocksizeSwitchplug           = 1
+	//BlocksizeTimer                = 21
+	MegablockSize  = 1000
+	SfFeedPause    = 2
+	SfMaintenance  = 1
+	SfThunderstorm = 3
+	SfWaterChange  = 0
 )
-
-type iProtocol interface {
-	SendData(code, data int) error
-	GetDataText(code int) (string, error)
-	GetData(code int) (int, error)
-	Disconnect()
-}
 
 func getOffset(index, blockCount, blockSize int) int {
 	return ((index % blockCount) * blockSize) + ((index / blockCount) * MegablockSize)
 }
 
 type Controller struct {
-	p                 iProtocol
+	p                 protocol.IProtocol
 	reminderCount     *int
 	sensorCount       *int
 	levelSensorCount  *int
@@ -53,12 +51,23 @@ type Controller struct {
 	logicCount        *int
 	sPortCount        *int
 	lPortCount        *int
+	callCount         int
 }
 
-func NewController(settings ConnectionSettings) (*Controller, error) {
-	p, err := newHttpProtocol(settings)
-	if err != nil {
-		return nil, err
+func NewController() (*Controller, error) {
+
+	var p protocol.IProtocol
+	var err error
+	if settings.Connection.Protocol == settings.ProtocolHTTP {
+		p, err = http.NewProtocol(settings.Connection)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		p, err = native.NewProtocol(settings.Connection)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var controller Controller
@@ -70,18 +79,28 @@ func (controller *Controller) Disconnect() {
 	controller.p.Disconnect()
 }
 
+func (controller *Controller) ResetStats() {
+	controller.callCount = 0
+}
+
+func (controller Controller) GetCallCount() int {
+	return controller.callCount
+}
+
 // region Protocol
 
 func (controller *Controller) getDataText(code int) (string, error) {
+	controller.callCount++
 	return controller.p.GetDataText(code)
 }
 
 func (controller *Controller) getData(code int) (int, error) {
+	controller.callCount++
 	return controller.p.GetData(code)
 }
 
 func (controller *Controller) getDataDate(code int) (time.Time, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return time.Now(), err
 	}
@@ -104,7 +123,7 @@ func (controller *Controller) getDataDate(code int) (time.Time, error) {
 }
 
 func (controller *Controller) getDataEnum(code int, convert func(int) string) (string, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return "", err
 	}
@@ -113,7 +132,7 @@ func (controller *Controller) getDataEnum(code int, convert func(int) string) (s
 }
 
 func (controller *Controller) getDataCurrentState(code int) (types.CurrentState, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +141,7 @@ func (controller *Controller) getDataCurrentState(code int) (types.CurrentState,
 }
 
 func (controller *Controller) getDataCurrentStateConvert(code int, convert func(int) int) (types.CurrentState, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return "", err
 	}
@@ -131,7 +150,7 @@ func (controller *Controller) getDataCurrentStateConvert(code int, convert func(
 }
 
 func (controller *Controller) getDataFloat(code int, multiplier float64) (float64, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return 0, err
 	}
@@ -140,7 +159,7 @@ func (controller *Controller) getDataFloat(code int, multiplier float64) (float6
 }
 
 func (controller *Controller) getDataMultiplier(code int, multiplier int) (int, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return 0, err
 	}
@@ -149,7 +168,7 @@ func (controller *Controller) getDataMultiplier(code int, multiplier int) (int, 
 }
 
 func (controller *Controller) getDataBool(code int) (bool, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return false, err
 	}
@@ -158,7 +177,7 @@ func (controller *Controller) getDataBool(code int) (bool, error) {
 }
 
 func (controller *Controller) getDataBoolConvert(code int, convert func(int) int) (bool, error) {
-	result, err := controller.p.GetData(code)
+	result, err := controller.getData(code)
 	if err != nil {
 		return false, err
 	}
@@ -261,7 +280,7 @@ func (controller *Controller) GetReminderIsRepeating(index int) bool {
 }
 
 func (controller *Controller) GetReminderPeriod(index int) int {
-	result, _ := controller.getData(code5.MEM1_REPEAT + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getData(code5.MEM1_DAYS + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	return result
 }
 
@@ -520,14 +539,12 @@ type TimerSettings struct {
 func (controller *Controller) GetTimerSettings(index int) TimerSettings {
 	config, _ := controller.getData(code5.TIMER1_PROPS + getOffset(index, 12, 21))
 
-	settings := TimerSettings{
+	return TimerSettings{
 		Mode:              types.GetTimerMode((config >> 7) & 0x7),
 		SwitchingCount:    config >> 11,
 		FeedPauseIfActive: (config & 0x10) != 0,
 		DayMode:           types.GetDayMode((config >> 10) & 0x1),
 	}
-
-	return settings
 }
 
 func (controller *Controller) GetDosingRate(index int) int {
@@ -774,3 +791,93 @@ func (controller *Controller) GetLPortValue(index int) float64 {
 }
 
 // endregion
+
+func (controller *Controller) FeedPause(index int, activate bool) error {
+	command := (index << 16) | (0 << 8) | SfFeedPause
+	if activate {
+		command = (index << 16) | (0xFF << 8) | SfFeedPause
+	}
+
+	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	if err != nil {
+		log.Errorf(err, "FeedPause: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) ClearReminder(reminder int) error {
+	offset := getOffset(reminder, BlockitemsReminder, BlocksizeReminder)
+	err := controller.p.SendData(code5.MEM1_NEXTMEM+offset, 0xFFFF)
+	if err != nil {
+		log.Errorf(err, "ClearReminder: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) ResetReminder(reminder int, period int) error {
+	nextReminder := time.Now().AddDate(0, 0, period)
+	span := nextReminder.Sub(time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC))
+	data := int(span.Hours() / 24)
+
+	offset := getOffset(reminder, BlockitemsReminder, BlocksizeReminder)
+	err := controller.p.SendData(code5.MEM1_NEXTMEM+offset, data)
+	if err != nil {
+		log.Errorf(err, "ClearReminder: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) ClearLevelAlarm(index int) error {
+	err := controller.p.SendData(code5.LEVEL1_ACTSTATE+getOffset(index, 3, 1), 0)
+
+	if err != nil {
+		log.Errorf(err, "ClearLevelAlarm: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) Thunderstorm(duration int) error {
+	command := (duration << 8) | SfThunderstorm
+	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	if err != nil {
+		log.Errorf(err, "Thunderstorm: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) WaterChange(index int) error {
+	command := index<<16 | (0xFF << 8) | SfWaterChange
+	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	if err != nil {
+		log.Errorf(err, "WaterChange: %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (controller *Controller) Maintenance(activate bool, index int) error {
+	command := (index << 16) | (0 << 8) | SfMaintenance
+	if activate {
+		command = (index << 16) | (0xFF << 8) | SfMaintenance
+	}
+
+	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+
+	if err != nil {
+		log.Errorf(err, "Maintenance: %s", err.Error())
+		return err
+	}
+
+	return nil
+}

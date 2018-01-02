@@ -21,8 +21,12 @@ func NewMaintenance(index int) *Maintenance {
 }
 
 func (maintenance *Maintenance) Update(controller *profilux.Controller) {
-	maintenance.IsActive = controller.IsMaintenanceActive(maintenance.Index)
 	maintenance.Duration = controller.GetMaintenanceDuration(maintenance.Index)
-	maintenance.TimeLeft = controller.GetMaintenanceTimeLeft(maintenance.Index)
 	maintenance.DisplayName = controller.GetMaintenanceText(maintenance.Index)
+	maintenance.UpdateState(controller)
+}
+
+func (maintenance *Maintenance) UpdateState(controller *profilux.Controller) {
+	maintenance.IsActive = controller.IsMaintenanceActive(maintenance.Index)
+	maintenance.TimeLeft = controller.GetMaintenanceTimeLeft(maintenance.Index)
 }

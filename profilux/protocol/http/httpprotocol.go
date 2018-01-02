@@ -1,9 +1,11 @@
-package profilux
+package http
 
 import (
 	"errors"
 	"fmt"
 	"github.com/cjburchell/reefstatus-go/common/log"
+	"github.com/cjburchell/reefstatus-go/profilux/protocol"
+	"github.com/cjburchell/reefstatus-go/profilux/settings"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -14,7 +16,7 @@ type httpProtocol struct {
 	address string
 }
 
-func newHttpProtocol(settings ConnectionSettings) (iProtocol, error) {
+func NewProtocol(settings settings.ConnectionSettings) (protocol.IProtocol, error) {
 	var p httpProtocol
 
 	p.address = fmt.Sprintf("%s:%d", settings.Address, settings.Port)
@@ -24,17 +26,19 @@ func newHttpProtocol(settings ConnectionSettings) (iProtocol, error) {
 
 func (p *httpProtocol) SendData(code, data int) error {
 
-	url := fmt.Sprintf("http://%s/communication.php?dir=enq&code=%d&data=%d", p.address, code, data)
+	url := fmt.Sprintf("http://%s/communication.php?dir=sel&code=%d&data=%d", p.address, code, data)
 
 	log.Debugf("SendData: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
+		log.Errorf(err, "SendData: %s", err.Error())
 		return err
 	}
 	defer resp.Body.Close()
 
 	reply, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Errorf(err, "SendData: %s", err.Error())
 		return err
 	}
 
@@ -50,7 +54,7 @@ func (p *httpProtocol) SendData(code, data int) error {
 	}
 
 	if strings.HasPrefix(dataParam, "NACK") {
-		return fmt.Errorf("error in command: %d", command)
+		return fmt.Errorf("error in command: %d Reply: %s", command, string(reply))
 	}
 
 	if !strings.HasPrefix(dataParam, "ACK") {
@@ -97,7 +101,7 @@ func (p *httpProtocol) GetData(code int) (int, error) {
 func (p *httpProtocol) getRawData(code int) (*string, error) {
 	url := fmt.Sprintf("http://%s/communication.php?dir=enq&code=%d", p.address, code)
 
-	log.Debugf("Get %s", url)
+	//log.Debugf("Get %s", url)
 
 	resp, err := http.Get(url)
 	if err != nil {

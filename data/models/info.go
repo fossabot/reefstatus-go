@@ -7,7 +7,7 @@ import (
 )
 
 type Info struct {
-	Maintenance     map[int]*Maintenance
+	Maintenance     []*Maintenance
 	OperationMode   types.OperationMode
 	Model           types.Model
 	SoftwareDate    time.Time
@@ -19,13 +19,13 @@ type Info struct {
 	SoftwareVersion float64
 	SerialNumber    int
 	LastUpdate      time.Time
-	Reminders       map[int]*Reminder
+	Reminders       []*Reminder
 }
 
 func NewInfo() *Info {
 	var info Info
-	info.Maintenance = make(map[int]*Maintenance)
-	info.Reminders = make(map[int]*Reminder)
+	info.Maintenance = make([]*Maintenance, 0)
+	info.Reminders = make([]*Reminder, 0)
 
 	return &info
 }
@@ -58,28 +58,59 @@ func (info *Info) Update(controller *profilux.Controller) {
 	}
 }
 
+func (info *Info) UpdateState(controller *profilux.Controller) {
+	info.LastUpdate = time.Now()
+	info.Alarm = controller.GetAlarm()
+	info.OperationMode = controller.GetOperationMode()
+	info.MoonPhase = controller.GetMoonPhase()
+
+	for _, item := range info.Maintenance {
+		item.UpdateState(controller)
+	}
+
+	for _, item := range info.Reminders {
+		item.UpdateState(controller)
+	}
+}
+
 func (info *Info) updateMaintenanceMode(controller *profilux.Controller, index int) {
-	maintenance, found := info.Maintenance[index]
-	if !found {
-		info.Maintenance[index] = NewMaintenance(index)
-		maintenance = info.Maintenance[index]
+	var maintenance *Maintenance = nil
+	for _, item := range info.Maintenance {
+		if item.Index == index {
+			maintenance = item
+			break
+		}
+	}
+
+	if maintenance == nil {
+		maintenance = NewMaintenance(index)
+		info.Maintenance = append(info.Maintenance, maintenance)
 	}
 
 	maintenance.Update(controller)
 }
 
 func (info *Info) updateReminder(controller *profilux.Controller, index int) {
-	reminder, found := info.Reminders[index]
+	var reminder *Reminder = nil
+	var reminderIndex = 0
+	for i, item := range info.Reminders {
+		if item.Index == index {
+			reminder = item
+			reminderIndex = i
+			break
+		}
+	}
+
 	if !controller.IsReminderActive(index) {
-		if found {
-			delete(info.Reminders, index)
+		if reminder != nil {
+			info.Reminders = append(info.Reminders[:reminderIndex], info.Reminders[reminderIndex+1:]...)
 		}
 		return
 	}
 
-	if !found {
+	if reminder == nil {
 		reminder = NewReminder(index)
-		info.Reminders[index] = reminder
+		info.Reminders = append(info.Reminders, reminder)
 	}
 
 	reminder.Update(controller)
