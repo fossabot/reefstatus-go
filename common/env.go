@@ -21,3 +21,12 @@ func GetEnv(key string, fallback string) string {
 	}
 	return fallback
 }
+
+func GetEnvBool(key string, fallback bool) bool {
+	if value, ok := os.LookupEnv(key); ok {
+		if result, err := strconv.ParseBool(value); err == nil {
+			return result
+		}
+	}
+	return fallback
+}

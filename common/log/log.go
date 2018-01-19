@@ -3,19 +3,24 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"github.com/cjburchell/reefstatus-go/common"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"log"
 	"runtime"
 	"time"
 )
 
-type Level string
+type Level struct {
+	Text     string
+	Severity int
+}
 
-const (
-	INFO    = "Info"
-	DEBUG   = "Debug"
-	WARNING = "Warning"
-	ERROR   = "Error"
-	FATAL   = "Fatal"
+var (
+	DEBUG   = Level{Text: "Debug", Severity: 0}
+	INFO    = Level{Text: "Info", Severity: 1}
+	WARNING = Level{Text: "Warning", Severity: 2}
+	ERROR   = Level{Text: "Error", Severity: 3}
+	FATAL   = Level{Text: "Fatal", Severity: 4}
 )
 
 func getStackTrace() string {
@@ -91,7 +96,30 @@ func Printf(format string, v ...interface{}) {
 	printLog(fmt.Sprintf(format, v...), INFO)
 }
 
+var minLogLevel int
+var logToConsole bool
+var logToFile bool
+var logger = lumberjack.Logger{
+	MaxAge:     1,
+	MaxBackups: 20,
+}
+
+func init() {
+	minLogLevel = common.GetEnvInt("LOG_LEVEL", 1)
+	logToConsole = common.GetEnvBool("LOG_CONSOLE", true)
+	logToFile = common.GetEnvBool("LOG_FILE", true)
+	logger.Filename = common.GetEnv("LOG_FILE_PATH", "e:\\data\\log\\server.log")
+}
+
 func printLog(text string, level Level) {
-	formattedText := fmt.Sprintf("[%s] %d - %s", level, time.Now().UnixNano()/1000000, text)
-	fmt.Println(formattedText)
+	if level.Severity >= minLogLevel {
+		formattedText := fmt.Sprintf("[%s] %d - %s", level.Text, time.Now().UnixNano()/1000000, text)
+		if logToConsole {
+			fmt.Println(formattedText)
+		}
+
+		if logToFile {
+			logger.Write([]byte(formattedText + "\n"))
+		}
+	}
 }
