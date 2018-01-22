@@ -3,8 +3,11 @@ package main
 import (
 	"github.com/cjburchell/reefstatus-go/alert"
 	"github.com/cjburchell/reefstatus-go/common/log"
+	"github.com/cjburchell/reefstatus-go/communication"
 	"github.com/cjburchell/reefstatus-go/data"
 	"github.com/cjburchell/reefstatus-go/history"
+	"github.com/nats-io/go-nats"
+	"strconv"
 	"time"
 )
 
@@ -12,12 +15,12 @@ const LogRate = time.Second * 30
 const HourLogRate = time.Hour
 const DayLogRate = time.Hour * 24
 
-func Update() {
+func UpdateController() {
+	session := communication.NewSession()
+	defer session.Close()
 	data.Controller.Update()
-	alert.Check()
 
-	go updateWeekData()
-	go updateYearData()
+	session.Publish(communication.UpdateMessage, strconv.FormatBool(true))
 
 	updateCount := 0
 	for {
@@ -28,14 +31,39 @@ func Update() {
 		} else {
 			data.Controller.UpdateState()
 		}
-		history.SaveDay()
-		alert.Check()
+
+		session.Publish(communication.UpdateMessage, strconv.FormatBool(false))
 		updateCount++
 	}
-
 }
 
-func updateWeekData() {
+func UpdateAlerts() {
+	session := communication.NewSession()
+	defer session.Close()
+	ch := session.Subscribe(communication.UpdateMessage)
+	for {
+		<-ch
+		alert.Check()
+	}
+}
+
+func UpdateHistory() {
+	session := communication.NewSession()
+	defer session.Close()
+	ch := session.Subscribe(communication.UpdateMessage)
+
+	for {
+		<-ch
+		history.SaveDay()
+	}
+}
+
+func UpdateWeekHistory() {
+	session := communication.NewSession()
+	defer session.Close()
+	ch := session.Subscribe(communication.UpdateMessage)
+	<-ch
+
 	lastHourSavedTime, err := history.GetLastTimeWeekDataWasSaved()
 	if err != nil {
 		log.Error(err)
@@ -72,7 +100,12 @@ func updateWeekData() {
 	}
 }
 
-func updateYearData() {
+func UpdateYearHistory() {
+	session := communication.NewSession()
+	defer session.Close()
+	ch := session.Subscribe(communication.UpdateMessage)
+	<-ch
+
 	lastHourSavedTime, err := history.GetLastTimeYearDataWasSaved()
 	if err != nil {
 		return

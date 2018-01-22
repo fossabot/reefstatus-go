@@ -9,7 +9,11 @@ import (
 )
 
 func main() {
-	go Update()
+	go UpdateAlerts()
+	go UpdateHistory()
+	go UpdateWeekHistory()
+	go UpdateYearHistory()
+	go UpdateController()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
