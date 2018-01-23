@@ -1,8 +1,19 @@
-node {
-        ws("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/") {
-            withEnv(["GOPATH=${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}"]) {
-                env.PATH="${GOPATH}/bin:$PATH"
+pipeline {
+        agent {
+            docker {
+                image 'golang'
+                args '-p 3000:3000'
+                customWorkspace '${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}'
+            }
+        }
 
+        environment {
+                GOPATH = '${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}'
+                PATH =  "${GOPATH}/bin:$PATH"
+        }
+
+
+        stages {
                 stage('Checkout'){
                     echo 'Checking out SCM'
                     checkout scm
@@ -38,6 +49,5 @@ node {
 
                     sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go build -o service"""
                 }
-            }
         }
 }
