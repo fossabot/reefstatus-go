@@ -6,6 +6,11 @@ pipeline {
             }
         }
 
+        environment {
+                GOPATH = '/var/jenkins_home/workspace/ReefStatus'
+                PATH =  "${GOPATH}/bin:$PATH"
+        }
+
         stages {
                 stage('Pre Test'){
                     steps {
@@ -20,13 +25,13 @@ pipeline {
                     steps {
                         echo 'Vetting'
 
-                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go tool vet ./..."""
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go tool vet ./..."
 
                         echo 'Linting'
-                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && golint ./..."""
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && golint ./..."
 
                         echo 'Testing'
-                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ./..."""
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ./..."
                     }
                 }
 
@@ -34,7 +39,7 @@ pipeline {
                     steps {
                         echo 'Building Executable'
 
-                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go build -o service"""
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go build -o service"
                     }
                 }
         }
