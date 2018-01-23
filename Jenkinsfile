@@ -37,20 +37,14 @@ pipeline {
 
                         //Print them with 'awk '$0="./src/"$0' projectPaths' in order to get full relative path to $GOPATH
                         def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths"""
-                    }
 
-                    steps {
                         echo 'Vetting'
 
                         sh """cd $GOPATH && go tool vet ${paths}"""
-                    }
 
-                    steps {
                         echo 'Linting'
                         sh """cd $GOPATH && golint ${paths}"""
-                    }
 
-                    steps {
                         echo 'Testing'
                         sh """cd $GOPATH && go test -race -cover ${paths}"""
                     }
