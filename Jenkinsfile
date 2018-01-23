@@ -6,11 +6,6 @@ pipeline {
             }
         }
 
-        environment {
-                GOPATH = '${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}'
-                PATH =  "${GOPATH}/bin:$PATH"
-        }
-
         stages {
                 stage('Pre Test'){
                     steps {
