@@ -25,13 +25,13 @@ pipeline {
                     steps {
                         echo 'Vetting'
 
-                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go tool vet ./..."
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go tool vet ."
 
                         echo 'Linting'
-                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && golint ./..."
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && golint ."
 
                         echo 'Testing'
-                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ./..."
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ."
                     }
                 }
 
