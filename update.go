@@ -6,7 +6,6 @@ import (
 	"github.com/cjburchell/reefstatus-go/communication"
 	"github.com/cjburchell/reefstatus-go/data"
 	"github.com/cjburchell/reefstatus-go/history"
-	"github.com/nats-io/go-nats"
 	"strconv"
 	"time"
 )
