@@ -31,22 +31,15 @@ pipeline {
                 stage('Test'){
 
                     steps {
-                        //List all our project files with 'go list ./... | grep -v /vendor/ | grep -v github.com | grep -v golang.org'
-                        //Push our project files relative to ./src
-                        sh 'cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go list ./... | grep -v /vendor/ > projectPaths'
-
-                        //Print them with 'awk '$0="./src/"$0' projectPaths' in order to get full relative path to $GOPATH
-                        def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths"""
-
                         echo 'Vetting'
 
-                        sh """cd $GOPATH && go tool vet ${paths}"""
+                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go tool vet ./..."""
 
                         echo 'Linting'
-                        sh """cd $GOPATH && golint ${paths}"""
+                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && golint ./..."""
 
                         echo 'Testing'
-                        sh """cd $GOPATH && go test -race -cover ${paths}"""
+                        sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ./..."""
                     }
                 }
 
