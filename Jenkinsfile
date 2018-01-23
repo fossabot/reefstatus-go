@@ -14,7 +14,7 @@ pipeline {
         stages {
                 stage('Pre Test'){
                     steps {
-                        echo "${GOPATH}
+                        echo "${GOPATH}"
                         echo 'Pulling Dependencies'
                         sh 'go version'
                     }
