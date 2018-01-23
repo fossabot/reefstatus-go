@@ -44,6 +44,7 @@ pipeline {
                 }
 
                 stage('Build Image') {
+                    agent any
                     steps {
                          echo 'Build Image'
                         sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && docker build -t reefstatus:latest ."
