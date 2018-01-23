@@ -43,27 +43,6 @@ func getDatabase(databaseName string) (*couchdb.Database, error) {
 
 	auth := couchdb.BasicAuth{Username: "admin", Password: "admin"}
 
-	/*list, err := connection.GetDBList()
-	if err != nil {
-		return nil, err
-	}
-
-	found := false
-	for _, item := range list {
-		if item == databaseName {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		err := connection.CreateDB(databaseName, &auth)
-		if err != nil {
-			return nil, err
-		}
-
-	}*/
-
 	database := connection.SelectDB(databaseName, &auth)
 	return database, nil
 

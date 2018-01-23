@@ -15,6 +15,30 @@
 			"revisionTime": "2017-12-08T16:08:15Z"
 		},
 		{
+			"checksumSHA1": "WnL/x0i1j2b7HZGV1sSKhaTQRbg=",
+			"path": "github.com/nats-io/go-nats",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "JlZA7P9zxdiO2xZh7PsxLpPBaEg=",
+			"path": "github.com/nats-io/go-nats/encoders/builtin",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "4myIR9VssaX/4mBKSW6mrG7mKPQ=",
+			"path": "github.com/nats-io/go-nats/util",
+			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",
+			"revisionTime": "2017-11-14T23:23:38Z"
+		},
+		{
+			"checksumSHA1": "H2Tgax0aq4hKIcsSpggo/VpnJVM=",
+			"path": "github.com/nats-io/nuid",
+			"revision": "33c603157d6fd1b0ac2599bcc4a286b36479a06d",
+			"revisionTime": "2017-10-25T20:31:29Z"
+		},
+		{
 			"checksumSHA1": "5a1GlQJ5Fc7CNbRw8XYVdGZD5Rk=",
 			"path": "github.com/rhinoman/couchdb-go",
 			"revision": "f2482e23164eaf6ade127514f9a2153d4152b038",
