@@ -1,60 +1,24 @@
-pipeline {
-        agent {
-            docker {
-                image 'golang'
-                args '-p 3000:3000'
-            }
+node {
+    def app
+
+    stage('Clone repository') {
+        /* Let's make sure we have the repository cloned to our workspace */
+        checkout scm
+    }
+
+    stage('Build image') {
+        /* This builds the actual image; synonymous to
+         * docker build on the command line */
+
+        app = docker.build("cjburchell/reefstatus")
+    }
+
+    stage('Test image') {
+        /* Ideally, we would run a test framework against our image.
+         * For this example, we're using a Volkswagen-type approach ;-) */
+
+        app.inside {
+            sh 'echo "Tests passed"'
         }
-
-        environment {
-                GOPATH = '/var/jenkins_home/workspace/ReefStatus'
-                PATH =  "${GOPATH}/bin:$PATH"
-        }
-
-        stages {
-                stage('Pre Test'){
-                    steps {
-                        echo "${GOPATH}"
-                        echo 'Pulling Dependencies'
-                        sh 'go version'
-                    }
-                }
-
-                stage('Test'){
-
-                    steps {
-                        echo 'Vetting'
-
-                        //sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go tool vet ."
-
-                        echo 'Linting'
-                        //sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && golint ."
-
-                        echo 'Testing'
-                       // sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go test -race -cover ."
-                    }
-                }
-
-                stage('Build') {
-                    steps {
-                        echo 'Building Executable'
-
-                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go build -o service"
-                    }
-                }
-
-                stage('Build Image') {
-                    agent any
-                    steps {
-                         echo 'Build Image'
-                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && docker build -t reefstatus:latest ."
-                    }
-                }
-
-                stage('Push Image') {
-                    steps {
-                        echo 'Push Image'
-                    }
-                }
-        }
+    }
 }
