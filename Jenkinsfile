@@ -42,5 +42,16 @@ pipeline {
                         sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && go build -o service"
                     }
                 }
+
+                stage('Build Image') {
+                    echo 'Build Image'
+                    steps {
+                        sh "cd ${GOPATH}/src/github.com/cjburchell/reefstatus-go/ && docker build -t reefstatus:latest ."
+                    }
+                }
+
+                stage('Push Image') {
+                    echo 'Push Image'
+                }
         }
 }
