@@ -3,7 +3,6 @@ pipeline {
             docker {
                 image 'golang'
                 args '-p 3000:3000'
-                customWorkspace '${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}'
             }
         }
 
@@ -12,17 +11,10 @@ pipeline {
                 PATH =  "${GOPATH}/bin:$PATH"
         }
 
-
         stages {
-                stage('Checkout'){
-                    steps {
-                        echo 'Checking out SCM'
-                        checkout scm
-                    }
-                }
-
                 stage('Pre Test'){
                     steps {
+                        echo "${GOPATH}
                         echo 'Pulling Dependencies'
                         sh 'go version'
                     }
