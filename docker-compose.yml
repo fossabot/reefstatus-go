@@ -1,17 +1,23 @@
 version: '2'
 services:
   couch:
-    image: "couchdb"
+    image: "couchdb:latest"
     ports:
      - "5984:5984"
     environment:
      - COUCHDB_USER=admin
      - COUCHDB_PASSWORD=admin
     volumes:
-     - /e/data/db:/usr/local/var/lib/couchdb
-     - /e/data/log:/reefstaus/log
+     -  /volume1/Storage/reefstatus/data/db:/usr/local/var/lib/couchdb
+     -  /volume1/Storage/reefstatus/data/log:/reefstaus/log
+  nats:
+    image: "nats:latest"
+    ports:
+         - "4222:4222"
+         - "6222:6222"
+         - "8222:8222"
   reefstatus:
-    build: .
+    image: "cjburchell/reefstatus:latest"
     environment:
          - COUCHDB_ADDRESS=couch
          - COUCHDB_PORT=5984
@@ -25,4 +31,4 @@ services:
     ports:
      - "8082:8082"
     volumes:
-      - /e/data/log:/reefstaus/log
+      -  /volume1/Storage/reefstatus/data/log:/reefstaus/log
