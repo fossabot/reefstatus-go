@@ -1,34 +1,26 @@
 node {
-    def root = tool name: 'Go 1.8', type: 'go'
-    withEnv(["GOROOT=${root}", "PATH+GO=${root}/bin"]) {
-       sh 'go version'
+    stage('Clone repository') {
+        /* Let's make sure we have the repository cloned to our workspace */
+        checkout scm
+    }
 
-       ws("${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}/") {
-           withEnv(["GOPATH=${JENKINS_HOME}/jobs/${JOB_NAME}/builds/${BUILD_ID}"]) {
-               env.PATH="${GOPATH}/bin:$PATH"
+    stage('Build'){
+        docker.image('golang').inside("-v ${env.WORKSPACE}:/go/src/github.com/cjburchell/reefstatus-go "){
 
-               def app
+         // Debugging
+         sh 'echo GOPATH: $GOPATH'
+         sh "ls -al /go/src/github.com/cjburchell/reefstatus-go"
+         sh "cd /go/src/github.com/cjburchell/reefstatus-go"
+         sh "pwd"
 
-               stage('Clone repository') {
-                   /* Let's make sure we have the repository cloned to our workspace */
-                   checkout scm
-               }
+         sh """cd /go/src/github.com/cjburchell/reefstatus-go && go build -o main ."""
+        }
+    }
 
-               stage('Pre Test'){
-                    sh 'go version'
-               }
+    stage('Build image') {
+        /* This builds the actual image; synonymous to
+         * docker build on the command line */
 
-               stage('Build'){
-                   sh """cd $GOPATH/src/github.com/cjburchell/reefstatus-go && go build -o main ."""
-               }
-
-               stage('Build image') {
-                   /* This builds the actual image; synonymous to
-                    * docker build on the command line */
-
-                   app = docker.build("cjburchell/reefstatus")
-               }
-           }
-       }
+        docker.build("cjburchell/reefstatus")
     }
 }
