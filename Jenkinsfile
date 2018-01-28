@@ -11,8 +11,8 @@ node {
         docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
 
             sh """cd ${goPath}"""
-            sh """go list ./..."""
-            sh """go list ./... | grep -v /vendor/ > projectPaths.txt"""
+            sh 'go list ./...'
+            sh 'go list ./... | grep -v /vendor/ > projectPaths.txt'
             def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths.txt"""
 
             sh 'echo paths: ${paths}'
