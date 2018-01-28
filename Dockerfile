@@ -1,4 +1,4 @@
-FROM scrach
+FROM scratch
 
 COPY .  /server
 
