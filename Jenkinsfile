@@ -7,28 +7,28 @@ node {
     String goPath = "/go/src/github.com/cjburchell/reefstatus-go"
     String workspacePath =  "/volume1/Storage/jenkins-data/workspace/ReefStatus"
 
-    stage('Build'){
-
-        sh "ls -al"
-        sh "pwd"
-        sh 'echo WORKSPACE: $WORKSPACE'
-
+    stage('Test') {
         docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
+            sh 'cd ${goPath} && go list ./... | grep -v /vendor/ > projectPaths'
+            def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths"""
 
-         // Debugging
-         sh 'echo GOPATH: $GOPATH'
-         sh "ls -al ${goPath}"
-         sh "cd ${goPath}"
-         sh "pwd"
+            sh 'echo paths: ${paths}'
 
+            sh """cd ${goPath} && go tool vet ${paths}"""
+
+            sh """cd ${goPath} && golint ${paths}"""
+
+            sh """cd ${goPath} && go test -race -cover ${paths}"""
+        }
+    }
+
+    stage('Build'){
+        docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
          sh """cd ${goPath} && go build -o main ."""
         }
     }
 
     stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
-
         docker.build("cjburchell/reefstatus")
     }
 }
