@@ -1,9 +1,7 @@
-FROM golang
+FROM scrach
 
-COPY .  /go/src/github.com/cjburchell/reefstatus-go
+COPY .  /server
 
-WORKDIR  /go/src/github.com/cjburchell/reefstatus-go
+WORKDIR  /server
 
-RUN go build -o main .
-
-CMD ["/go/src/github.com/cjburchell/reefstatus-go/main"]
+CMD ["/server/main"]
