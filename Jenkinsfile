@@ -5,6 +5,7 @@ node {
     }
 
     String goPath = "/go/src/github.com/cjburchell/reefstatus-go"
+    String workspacePath =  "/volume1/Storage/jenkins-data/workspace/ReefStatus"
 
     stage('Build'){
 
@@ -12,7 +13,7 @@ node {
         sh "pwd"
         sh 'echo WORKSPACE: $WORKSPACE'
 
-        docker.image('golang:1.8.0-alpine').inside("-v ${pwd()}:${goPath}"){
+        docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
 
          // Debugging
          sh 'echo GOPATH: $GOPATH'
