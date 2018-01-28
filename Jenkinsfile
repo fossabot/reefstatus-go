@@ -9,9 +9,9 @@ node {
 
     stage('Test') {
         docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
-            sh 'cd /go/src && go list ./...'
-            sh 'cd ${goPath} && go list ./...'
-            sh 'cd ${goPath} && go list ./... | grep -v /vendor/ > projectPaths'
+            sh """cd /go/src && go list ./..."""
+            sh """cd ${goPath} && go list ./..."""
+            sh 'cd /go/src && go list ./... | grep -v /vendor/ > projectPaths'
             def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths"""
 
             sh 'echo paths: ${paths}'
