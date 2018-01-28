@@ -13,15 +13,15 @@ node {
             sh """cd ${goPath}"""
             sh 'go list ./...'
             sh 'go list ./... | grep -v /vendor/ > projectPaths.txt'
-            def paths = sh returnStdout: true, script: """awk '\$0="./src/"\$0' projectPaths.txt"""
+            def paths = sh returnStdout: true, script: """awk '"_/var/jenkins_home/workspace/ReefStatus"\$0="./src/github.com/cjburchell/reefstatus-go"\$0' projectPaths.txt"""
 
             sh 'echo paths: ${paths}'
 
-            sh """cd ${goPath} && go tool vet ${paths}"""
+            sh """cd /go && go tool vet ${paths}"""
 
-            sh """cd ${goPath} && golint ${paths}"""
+            sh """cd /go && golint ${paths}"""
 
-            sh """cd ${goPath} && go test -race -cover ${paths}"""
+            sh """cd /go && go test -race -cover ${paths}"""
         }
     }
 
