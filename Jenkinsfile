@@ -5,6 +5,10 @@ node {
     }
 
     stage('Build'){
+
+        sh "ls -al"
+        sh "pwd"
+
         docker.image('golang').inside("-v ${env.WORKSPACE}:/go/src/github.com/cjburchell/reefstatus-go "){
 
          // Debugging
