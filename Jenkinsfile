@@ -13,8 +13,9 @@ node {
         }
     }
 
+    def app
     stage('Build image') {
-        docker.build("cjburchell/reefstatus")
+        app = docker.build("cjburchell/reefstatus")
     }
 
      stage('Push image') {
