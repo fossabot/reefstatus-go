@@ -19,7 +19,7 @@ func UpdateController() {
 	defer session.Close()
 	data.Controller.Update()
 
-	session.Publish(communication.UpdateMessage, strconv.FormatBool(true))
+	session.Publish(communication.UpdateMessage, []byte(strconv.FormatBool(true)))
 
 	updateCount := 0
 	for {
@@ -31,7 +31,7 @@ func UpdateController() {
 			data.Controller.UpdateState()
 		}
 
-		session.Publish(communication.UpdateMessage, strconv.FormatBool(false))
+		session.Publish(communication.UpdateMessage, []byte(strconv.FormatBool(false)))
 		updateCount++
 	}
 }

@@ -3,6 +3,12 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "qBQ7l9cnsr4L1mW9xDMUtgmFHKU=",
+			"path": "github.com/cjburchell/pubsub",
+			"revision": "8f7d4ffdaa0ccd455bc0b217e366c8ee9fd8d633",
+			"revisionTime": "2018-01-31T08:04:49Z"
+		},
+		{
 			"checksumSHA1": "Vv2xzrpgM+kLyw/XhdO/1p/i5cU=",
 			"path": "github.com/google/uuid",
 			"revision": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
