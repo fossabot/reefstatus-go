@@ -21,7 +21,7 @@ func SaveWeek() error {
 
 	now := time.Now()
 	for _, probe := range data.Controller.GetProbes() {
-		average, err := GetLastHourAvrage(probe.Id)
+		average, err := GetLastHourAverage(probe.Id)
 		if err != nil {
 			return err
 		}
@@ -37,7 +37,7 @@ func SaveWeek() error {
 func SaveYear() error {
 	now := time.Now()
 	for _, probe := range data.Controller.GetProbes() {
-		average, err := GetLastDayAvrage(probe.Id)
+		average, err := GetLastDayAverage(probe.Id)
 		if err != nil {
 			return err
 		}
