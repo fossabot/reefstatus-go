@@ -230,7 +230,7 @@ func average(data []Data) float64 {
 	return sum / float64(len(data))
 }
 
-func GetLastHourAvrage(dataType string) (float64, error) {
+func GetLastHourAverage(dataType string) (float64, error) {
 	data, err := GetDataPointsFromLastHour(dataType)
 	if err != nil {
 		return 0, err
@@ -238,7 +238,7 @@ func GetLastHourAvrage(dataType string) (float64, error) {
 	return average(data), nil
 }
 
-func GetLastDayAvrage(dataType string) (float64, error) {
+func GetLastDayAverage(dataType string) (float64, error) {
 	data, err := GetDayDataPoints(dataType)
 	if err != nil {
 		return 0, err
