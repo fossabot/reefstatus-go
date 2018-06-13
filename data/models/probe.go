@@ -8,7 +8,11 @@ import (
 )
 
 type Probe struct {
-	SensorInfo
+	BaseInfo
+	Format         int
+	SensorType     types.SensorType
+	Index          int
+	AlarmState     types.CurrentState
 	NominalValue   float64
 	SensorMode     types.SensorMode
 	AlarmEnable    bool
@@ -41,8 +45,6 @@ func (probe *Probe) setAlarmDeviation(value float64) {
 
 func (probe Probe) getUnits() string {
 	switch probe.SensorType {
-	case types.SensorTypeLevel:
-		return "State"
 	case types.SensorTypePH:
 		return "PH"
 	case types.SensorTypeAirTemperature:

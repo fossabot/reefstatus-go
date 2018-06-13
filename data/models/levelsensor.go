@@ -7,7 +7,9 @@ import (
 )
 
 type LevelSensor struct {
-	SensorInfo
+	BaseInfo
+	Index             int
+	AlarmState        types.CurrentState
 	OperationMode     types.LevelSensorOperationMode
 	Value             types.CurrentState
 	SensorIndex       int
@@ -22,7 +24,6 @@ func NewLevelSensor(index int) *LevelSensor {
 	var sensor LevelSensor
 	sensor.Index = index
 	sensor.Type = "LevelSensor"
-	sensor.SensorType = types.SensorTypeLevel
 	sensor.Units = "State"
 	sensor.Id = fmt.Sprintf("Level%d", 1+index)
 	return &sensor

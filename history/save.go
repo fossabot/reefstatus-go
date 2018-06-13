@@ -8,44 +8,73 @@ import (
 func SaveDay() error {
 	now := time.Now()
 	for _, probe := range data.Controller.GetProbes() {
-		err := Save(Data{Type: probe.Id, Value: probe.Value, Time: now}, DayRange)
+		err := DataInstance.SaveDayData(Data{Type: probe.Id, Value: probe.Value, Time: now})
 		if err != nil {
 			return err
 		}
 	}
 
-	return CleanUpDay()
+	return DataInstance.CleanUpDay()
 }
 
 func SaveWeek() error {
 
 	now := time.Now()
 	for _, probe := range data.Controller.GetProbes() {
-		average, err := GetLastHourAverage(probe.Id)
+		average, err := getLastHourAverage(probe.Id)
 		if err != nil {
 			return err
 		}
 
-		err = Save(Data{Type: probe.Id, Value: average, Time: now}, WeekRange)
+		err = DataInstance.SaveWeekData(Data{Type: probe.Id, Value: average, Time: now})
 		if err != nil {
 			return err
 		}
 	}
-	return CleanUpWeek()
+	return DataInstance.CleanUpWeek()
 }
 
 func SaveYear() error {
 	now := time.Now()
 	for _, probe := range data.Controller.GetProbes() {
-		average, err := GetLastDayAverage(probe.Id)
+		average, err := getLastDayAverage(probe.Id)
 		if err != nil {
 			return err
 		}
 
-		err = Save(Data{Type: probe.Id, Value: average, Time: now}, YearRange)
+		err = DataInstance.SaveYearData(Data{Type: probe.Id, Value: average, Time: now})
 		if err != nil {
 			return err
 		}
 	}
-	return CleanUpYear()
+	return DataInstance.CleanUpYear()
+}
+
+func average(data []Data) float64 {
+	if len(data) == 0 {
+		return 0
+	}
+
+	sum := float64(0)
+	for _, item := range data {
+		sum += item.Value
+	}
+
+	return sum / float64(len(data))
+}
+
+func getLastHourAverage(dataType string) (float64, error) {
+	data, err := DataInstance.GetDataPointsFromLastHour(dataType)
+	if err != nil {
+		return 0, err
+	}
+	return average(data), nil
+}
+
+func getLastDayAverage(dataType string) (float64, error) {
+	data, err := DataInstance.GetDayDataPoints(dataType)
+	if err != nil {
+		return 0, err
+	}
+	return average(data), nil
 }

@@ -14,8 +14,6 @@ const (
 	SensorTypeAirTemperature = "AirTemperature"
 	SensorTypeOxygen         = "Oxygen"
 	SensorTypeVoltage        = "Voltage"
-	SensorTypeLevel          = "Level"
-	SensorTypeDigitalInput   = "DigitalInput"
 )
 
 var sensorTypeMap = map[int]string{

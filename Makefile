@@ -12,7 +12,7 @@ SOURCES            :=$(shell find $(SOURCEDIR) -name '*.go')
 VERSION            = $(shell git rev-parse HEAD)
 BUILD_TIME         = `date +%FT%T%z`
 
-BINARY             = service
+BINARY             = main
 
 LD_X               = -X main.VERSION=${VERSION} -X main.BUILD_TIME=${BUILD_TIME}
 LD_EXT             = -s -extldflags \"-static\"

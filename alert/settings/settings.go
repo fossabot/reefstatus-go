@@ -16,8 +16,8 @@ type AlertSettings struct {
 }
 
 func newAlertSettings() (settings AlertSettings) {
-	settings.Enabled = common.GetEnv("ALERT_ENABLE", "true") == "true"
-	settings.SendOnReminder = common.GetEnv("ALERT_REMINDER_ENABLE", "true") == "true"
+	settings.Enabled = common.GetEnvBool("ALERT_ENABLE", false)
+	settings.SendOnReminder = common.GetEnvBool("ALERT_REMINDER_ENABLE", false)
 	settings.MailUserName = common.GetEnv("ALERT_MAIL_USERNAME", "reefstatusalert")
 	settings.MailPassword = common.GetEnv("ALERT_MAIL_PASSWORD", "")
 	settings.MailServer = common.GetEnv("ALERT_MAIL_SERVER", "smtp.gmail.com:587")

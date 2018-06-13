@@ -7,7 +7,8 @@ import (
 )
 
 type DigitalInput struct {
-	SensorInfo
+	BaseInfo
+	Index    int
 	Value    types.CurrentState
 	Function types.DigitalInputFunction
 }
@@ -16,7 +17,6 @@ func NewDigitalInput(index int) *DigitalInput {
 	var digitalInput DigitalInput
 	digitalInput.Index = index
 	digitalInput.Type = "DigitalInput"
-	digitalInput.SensorType = types.SensorTypeDigitalInput
 	digitalInput.Units = "State"
 	digitalInput.Id = fmt.Sprintf("DigitalInput%d", 1+index)
 

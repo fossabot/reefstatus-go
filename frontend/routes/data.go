@@ -19,7 +19,7 @@ func handleDayData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["Id"]
 
-	result, err := history.GetDayDataPoints(id)
+	result, err := history.DataInstance.GetDayDataPoints(id)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -36,7 +36,7 @@ func handleWeekData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["Id"]
 
-	result, err := history.GetWeekDataPoints(id)
+	result, err := history.DataInstance.GetWeekDataPoints(id)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func handleYearData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["Id"]
 
-	result, err := history.GetYearDataPoints(id)
+	result, err := history.DataInstance.GetYearDataPoints(id)
 	if err != nil {
 		log.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)

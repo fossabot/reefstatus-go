@@ -63,7 +63,7 @@ func UpdateWeekHistory() {
 	ch := session.Subscribe(communication.UpdateMessage)
 	<-ch
 
-	lastHourSavedTime, err := history.GetLastTimeWeekDataWasSaved()
+	lastHourSavedTime, err := history.DataInstance.GetLastTimeWeekDataWasSaved()
 	if err != nil {
 		log.Error(err)
 		return
@@ -105,7 +105,7 @@ func UpdateYearHistory() {
 	ch := session.Subscribe(communication.UpdateMessage)
 	<-ch
 
-	lastHourSavedTime, err := history.GetLastTimeYearDataWasSaved()
+	lastHourSavedTime, err := history.DataInstance.GetLastTimeYearDataWasSaved()
 	if err != nil {
 		return
 	}

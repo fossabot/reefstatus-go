@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/cjburchell/reefstatus-go/common/log"
 	"github.com/cjburchell/reefstatus-go/frontend/routes"
+	"github.com/cjburchell/reefstatus-go/history"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
@@ -12,6 +13,11 @@ import (
 )
 
 func main() {
+	err := history.DataInstance.Setup()
+	if err != nil {
+		log.Fatalf("Unable to Connect to history database", err.Error())
+	}
+
 	go UpdateAlerts()
 	go UpdateHistory()
 	go UpdateWeekHistory()

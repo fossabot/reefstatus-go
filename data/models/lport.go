@@ -6,16 +6,18 @@ import (
 )
 
 type LPort struct {
-	DeviceInfo
-	Value float64
+	BaseInfo
+	PortNumber int
+	Mode       profilux.PortMode
+	Value      float64
 }
 
-func NewLPort(index int) *LPort {
+func NewLPort(portNumber int) *LPort {
 	var lPort LPort
 	lPort.Type = "LPort"
 	lPort.Units = "%"
-	lPort.PortNumber = index
-	lPort.Id = fmt.Sprintf("L%d", 1+index)
+	lPort.PortNumber = portNumber
+	lPort.Id = fmt.Sprintf("L%d", 1+portNumber)
 	return &lPort
 }
 

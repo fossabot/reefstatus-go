@@ -1,4 +1,4 @@
-package code5
+package code
 
 const (
 	// Codes

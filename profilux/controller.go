@@ -3,7 +3,7 @@ package profilux
 import (
 	"github.com/cjburchell/reefstatus-go/common"
 	"github.com/cjburchell/reefstatus-go/common/log"
-	"github.com/cjburchell/reefstatus-go/profilux/code5"
+	"github.com/cjburchell/reefstatus-go/profilux/code"
 	"github.com/cjburchell/reefstatus-go/profilux/protocol"
 	"github.com/cjburchell/reefstatus-go/profilux/protocol/http"
 	"github.com/cjburchell/reefstatus-go/profilux/protocol/native"
@@ -199,52 +199,52 @@ func (controller *Controller) getDataFloatAndRound(code int, multiplier float64,
 // region Info
 
 func (controller *Controller) GetSoftwareVersion() float64 {
-	result, _ := controller.getDataFloatAndRound(code5.SOFTWAREVERSION, 0.01, 2)
+	result, _ := controller.getDataFloatAndRound(code.SOFTWAREVERSION, 0.01, 2)
 	return result
 }
 
 func (controller *Controller) GetModel() types.Model {
-	result, _ := controller.getDataEnum(code5.PRODUCTID, types.GetModel)
+	result, _ := controller.getDataEnum(code.PRODUCTID, types.GetModel)
 	return types.Model(result)
 }
 
 func (controller *Controller) GetSerialNumber() int {
-	result, _ := controller.getData(code5.SERIALNUMBER)
+	result, _ := controller.getData(code.SERIALNUMBER)
 	return result
 }
 
 func (controller *Controller) GetSoftwareDate() time.Time {
-	result, _ := controller.getDataDate(code5.SOFTWAREDATE)
+	result, _ := controller.getDataDate(code.SOFTWAREDATE)
 	return result
 }
 
 func (controller *Controller) GetDeviceAddress() int {
-	result, _ := controller.getData(code5.ADDRESS)
+	result, _ := controller.getData(code.ADDRESS)
 	return result
 }
 
 func (controller *Controller) GetLatitude() float64 {
-	result, _ := controller.getDataFloat(code5.LOC_LATITUDE, 0.1)
+	result, _ := controller.getDataFloat(code.LOC_LATITUDE, 0.1)
 	return result
 }
 
 func (controller *Controller) GetLongitude() float64 {
-	result, _ := controller.getDataFloat(code5.LOC_LONGITUDE, 0.1)
+	result, _ := controller.getDataFloat(code.LOC_LONGITUDE, 0.1)
 	return result
 }
 
 func (controller *Controller) GetMoonPhase() float64 {
-	result, _ := controller.getDataFloat(code5.MOON_ACTPHASE, 1)
+	result, _ := controller.getDataFloat(code.MOON_ACTPHASE, 1)
 	return result
 }
 
 func (controller *Controller) GetAlarm() types.CurrentState {
-	result, _ := controller.getDataCurrentState(code5.ISALARM)
+	result, _ := controller.getDataCurrentState(code.ISALARM)
 	return result
 }
 
 func (controller *Controller) GetOperationMode() types.OperationMode {
-	result, _ := controller.getDataEnum(code5.OPMODE, types.GetOperationMode)
+	result, _ := controller.getDataEnum(code.OPMODE, types.GetOperationMode)
 	return types.OperationMode(result)
 }
 
@@ -255,7 +255,7 @@ func (controller *Controller) GetOperationMode() types.OperationMode {
 func (controller *Controller) GetReminderCount() int {
 
 	if controller.reminderCount == nil {
-		count, _ := controller.getData(code5.GETREMINDERCOUNT)
+		count, _ := controller.getData(code.GETREMINDERCOUNT)
 		controller.reminderCount = &count
 	}
 
@@ -263,29 +263,29 @@ func (controller *Controller) GetReminderCount() int {
 }
 
 func (controller *Controller) IsReminderActive(index int) bool {
-	result, _ := controller.getData(code5.MEM1_NEXTMEM + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getData(code.MEM1_NEXTMEM + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	return result != 0xffff
 }
 
 func (controller *Controller) GetReminderNext(index int) time.Time {
-	result, _ := controller.getData(code5.MEM1_NEXTMEM + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getData(code.MEM1_NEXTMEM + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	nextReminder := time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
 	nextReminder = nextReminder.AddDate(0, 0, result)
 	return nextReminder
 }
 
 func (controller *Controller) GetReminderIsRepeating(index int) bool {
-	result, _ := controller.getDataBool(code5.MEM1_REPEAT + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getDataBool(code.MEM1_REPEAT + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	return result
 }
 
 func (controller *Controller) GetReminderPeriod(index int) int {
-	result, _ := controller.getData(code5.MEM1_DAYS + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getData(code.MEM1_DAYS + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	return result
 }
 
 func (controller *Controller) GetReminderText(index int) string {
-	result, _ := controller.getDataText(code5.MEM1_TEXT01 + getOffset(index, BlockitemsReminder, BlocksizeReminder))
+	result, _ := controller.getDataText(code.MEM1_TEXT01 + getOffset(index, BlockitemsReminder, BlocksizeReminder))
 	return result
 }
 
@@ -294,21 +294,21 @@ func (controller *Controller) GetReminderText(index int) string {
 // region Maintenance
 
 func (controller *Controller) IsMaintenanceActive(index int) bool {
-	result, _ := controller.getDataBool(code5.MAINTENANCE_ISACTIVE + getOffset(index, 1, 2))
+	result, _ := controller.getDataBool(code.MAINTENANCE_ISACTIVE + getOffset(index, 1, 2))
 	return result
 }
 
 func (controller *Controller) GetMaintenanceDuration(index int) int {
-	result, _ := controller.getDataMultiplier(code5.MAINTENANCE_TIMEOUT+getOffset(index, 1, 27), 60)
+	result, _ := controller.getDataMultiplier(code.MAINTENANCE_TIMEOUT+getOffset(index, 1, 27), 60)
 	return result
 }
 
 func (controller *Controller) GetMaintenanceTimeLeft(index int) int {
-	result, _ := controller.getDataMultiplier(code5.MAINTENANCE_REMATINGTIME+getOffset(index, 1, 2), 60)
+	result, _ := controller.getDataMultiplier(code.MAINTENANCE_REMATINGTIME+getOffset(index, 1, 2), 60)
 	return result
 }
 func (controller *Controller) GetMaintenanceText(index int) string {
-	result, _ := controller.getDataText(code5.MAINT_NAME + getOffset(index, 64, 1))
+	result, _ := controller.getDataText(code.MAINT_NAME + getOffset(index, 64, 1))
 	return result
 }
 
@@ -323,7 +323,7 @@ func getSensorOffset(index int) int {
 func (controller *Controller) GetSensorCount() int {
 
 	if controller.sensorCount == nil {
-		count, _ := controller.getData(code5.GETSENSORCOUNT)
+		count, _ := controller.getData(code.GETSENSORCOUNT)
 		controller.sensorCount = &count
 	}
 
@@ -331,61 +331,61 @@ func (controller *Controller) GetSensorCount() int {
 }
 
 func (controller *Controller) GetSensorType(index int) types.SensorType {
-	result, _ := controller.getDataEnum(code5.SENSORPARA1_SENSORTYPE+getSensorOffset(index), types.GetSensorType)
+	result, _ := controller.getDataEnum(code.SENSORPARA1_SENSORTYPE+getSensorOffset(index), types.GetSensorType)
 	return types.SensorType(result)
 }
 
 func (controller *Controller) GetSensorMode(index int) types.SensorMode {
-	result, _ := controller.getDataEnum(code5.SENSORPARA1_CAL1ADC+getSensorOffset(index), func(value int) string {
+	result, _ := controller.getDataEnum(code.SENSORPARA1_CAL1ADC+getSensorOffset(index), func(value int) string {
 		return types.GetSensorMode(value >> 12)
 	})
 	return types.SensorMode(result)
 }
 
 func (controller *Controller) GetSensorActive(index int) bool {
-	props, _ := controller.getData(code5.SENSORPARA1_PROPS + getSensorOffset(index))
+	props, _ := controller.getData(code.SENSORPARA1_PROPS + getSensorOffset(index))
 	return props&0x1 == 1
 }
 
 func (controller *Controller) GetProbeName(index int) string {
-	name, _ := controller.getDataText(code5.SENSOR1_NAME + getOffset(index, 32, 1))
+	name, _ := controller.getDataText(code.SENSOR1_NAME + getOffset(index, 32, 1))
 	return name
 }
 
 func (controller *Controller) GetSensorNominalValue(index int, multiplier float64) float64 {
-	result, _ := controller.getDataFloat(code5.SENSORPARA1_DESVALUE+getSensorOffset(index), multiplier)
+	result, _ := controller.getDataFloat(code.SENSORPARA1_DESVALUE+getSensorOffset(index), multiplier)
 	return result
 }
 
 func (controller *Controller) GetSensorAlarmDeviation(index int, multiplier float64) float64 {
-	result, _ := controller.getDataFloat(code5.SENSORPARA1_ALARMDEVIATION+getSensorOffset(index), multiplier)
+	result, _ := controller.getDataFloat(code.SENSORPARA1_ALARMDEVIATION+getSensorOffset(index), multiplier)
 	return result
 }
 
 func (controller *Controller) GetSensorAlarmEnable(index int) bool {
-	result, _ := controller.getDataBool(code5.SENSORPARA1_ALARMMODE + getSensorOffset(index))
+	result, _ := controller.getDataBool(code.SENSORPARA1_ALARMMODE + getSensorOffset(index))
 	return result
 }
 
 func (controller *Controller) GetSensorAlarm(index int) types.CurrentState {
-	result, _ := controller.getDataCurrentStateConvert(code5.SENSORPARA1_ACTSTATE+getOffset(index, 8, 8), func(i int) int {
+	result, _ := controller.getDataCurrentStateConvert(code.SENSORPARA1_ACTSTATE+getOffset(index, 8, 8), func(i int) int {
 		return i & 0x100
 	})
 	return result
 }
 
 func (controller *Controller) GetSensorValue(index int, multiplier float64) float64 {
-	result, _ := controller.getDataFloat(code5.SENSORPARA1_ACTVALUE+getOffset(index, 8, 8), multiplier)
+	result, _ := controller.getDataFloat(code.SENSORPARA1_ACTVALUE+getOffset(index, 8, 8), multiplier)
 	return result
 }
 
 func (controller *Controller) GetProbeOperationHours(index int) int {
-	result, _ := controller.getData(code5.SENSORPARA1_OHM + getOffset(index, 8, 8))
+	result, _ := controller.getData(code.SENSORPARA1_OHM + getOffset(index, 8, 8))
 	return result
 }
 
 func (controller *Controller) GetSensorFormat(index int) int {
-	result, _ := controller.getData(code5.SENSORPARA1_DISPLAYMODE + getSensorOffset(index))
+	result, _ := controller.getData(code.SENSORPARA1_DISPLAYMODE + getSensorOffset(index))
 	return result & 0x0f
 }
 
@@ -395,7 +395,7 @@ func (controller *Controller) GetSensorFormat(index int) int {
 
 func (controller *Controller) GetLevelSenosrCount() int {
 	if controller.levelSensorCount == nil {
-		count, _ := controller.getData(code5.GETLEVELSENSORCOUNT)
+		count, _ := controller.getData(code.GETLEVELSENSORCOUNT)
 		controller.levelSensorCount = &count
 	}
 
@@ -403,7 +403,7 @@ func (controller *Controller) GetLevelSenosrCount() int {
 }
 
 func (controller *Controller) GetLevelSensorMode(index int) types.LevelSensorOperationMode {
-	result, _ := controller.getDataEnum(code5.LEVEL1_PROPS+getOffset(index, 3, 3), func(value int) string {
+	result, _ := controller.getDataEnum(code.LEVEL1_PROPS+getOffset(index, 3, 3), func(value int) string {
 
 		return types.GetLevelSensorOperationMode(value >> 13)
 	})
@@ -411,7 +411,7 @@ func (controller *Controller) GetLevelSensorMode(index int) types.LevelSensorOpe
 }
 
 func (controller *Controller) GetLevelName(index int) string {
-	name, _ := controller.getDataText(code5.LEVEL_NAME + getOffset(index, 64, 1))
+	name, _ := controller.getDataText(code.LEVEL_NAME + getOffset(index, 64, 1))
 	return name
 }
 
@@ -431,7 +431,7 @@ func (controller *Controller) GetLevelSensorState(index int) LevelState {
 	// W - Water State
 	// R - Reserverd
 	var levelState LevelState
-	state, _ := controller.getData(code5.LEVEL1_ACTSTATE + getOffset(index, 3, 1))
+	state, _ := controller.getData(code.LEVEL1_ACTSTATE + getOffset(index, 3, 1))
 	state >>= 1
 	levelState.WaterMode = types.GetWaterMode(state & 0xf)
 	state >>= 4
@@ -445,13 +445,13 @@ func (controller *Controller) GetLevelSensorState(index int) LevelState {
 }
 
 func (controller *Controller) GetLevelSource1(index int) int {
-	result, _ := controller.getData(code5.LEVEL1_SOURCES + getOffset(index, 3, 3))
+	result, _ := controller.getData(code.LEVEL1_SOURCES + getOffset(index, 3, 3))
 	return result & 0xf
 
 }
 
 func (controller *Controller) GetLevelSource2(index int) int {
-	result, _ := controller.getData(code5.LEVEL1_SOURCES + getOffset(index, 3, 3))
+	result, _ := controller.getData(code.LEVEL1_SOURCES + getOffset(index, 3, 3))
 	result >>= 4
 	return result & 0xf
 }
@@ -470,7 +470,7 @@ func (controller *Controller) GetLevelSensorCurrentState(index int) LevelInputSt
 	// D - Delayed
 	// R - Reserverd
 	var levelState LevelInputState
-	state, _ := controller.getData(code5.LEVEL1_INPUT_STATE + getOffset(index, 4, 1))
+	state, _ := controller.getData(code.LEVEL1_INPUT_STATE + getOffset(index, 4, 1))
 	state >>= 5
 	levelState.Delayed = types.GetCurrentState(state & 0x1)
 	state >>= 1
@@ -487,7 +487,7 @@ func (controller *Controller) GetLevelSensorCurrentState(index int) LevelInputSt
 func (controller *Controller) GetDigitalInputCount() int {
 
 	if controller.digitalInputCount == nil {
-		count, _ := controller.getData(code5.GETDIGITALINPUTCOUNT)
+		count, _ := controller.getData(code.GETDIGITALINPUTCOUNT)
 		controller.digitalInputCount = &count
 	}
 
@@ -495,12 +495,12 @@ func (controller *Controller) GetDigitalInputCount() int {
 }
 
 func (controller *Controller) GetDigitalInputFunction(index int) types.DigitalInputFunction {
-	result, _ := controller.getDataEnum(code5.DIGITALINPUT1_FUNCTION+getOffset(index, 4, 1), types.GetDigitalInputFunction)
+	result, _ := controller.getDataEnum(code.DIGITALINPUT1_FUNCTION+getOffset(index, 4, 1), types.GetDigitalInputFunction)
 	return types.DigitalInputFunction(result)
 }
 
 func (controller *Controller) GetDigitalInputState(index int) types.CurrentState {
-	state, _ := controller.getData(code5.DIGITALINPUTSSTATE + getOffset(index, 4, 0))
+	state, _ := controller.getData(code.DIGITALINPUTSSTATE + getOffset(index, 4, 0))
 	switch index % 4 {
 	case 0:
 		return types.GetCurrentState(state % 0x1)
@@ -522,7 +522,7 @@ func (controller *Controller) GetDigitalInputState(index int) types.CurrentState
 func (controller *Controller) GetTimerCount() int {
 
 	if controller.timerCount == nil {
-		count, _ := controller.getData(code5.GETTIMERCOUNT)
+		count, _ := controller.getData(code.GETTIMERCOUNT)
 		controller.timerCount = &count
 	}
 
@@ -537,7 +537,7 @@ type TimerSettings struct {
 }
 
 func (controller *Controller) GetTimerSettings(index int) TimerSettings {
-	config, _ := controller.getData(code5.TIMER1_PROPS + getOffset(index, 12, 21))
+	config, _ := controller.getData(code.TIMER1_PROPS + getOffset(index, 12, 21))
 
 	return TimerSettings{
 		Mode:              types.GetTimerMode((config >> 7) & 0x7),
@@ -548,7 +548,7 @@ func (controller *Controller) GetTimerSettings(index int) TimerSettings {
 }
 
 func (controller *Controller) GetDosingRate(index int) int {
-	result, _ := controller.getData(code5.TIMER1_RATEPERDOSING + getOffset(index, 12, 21))
+	result, _ := controller.getData(code.TIMER1_RATEPERDOSING + getOffset(index, 12, 21))
 	return result
 }
 
@@ -557,7 +557,7 @@ func (controller *Controller) GetDosingRate(index int) int {
 // region Light
 func (controller *Controller) GetLightCount() int {
 	if controller.lightCount == nil {
-		count, _ := controller.getData(code5.GETILLUMINATIONCOUNT)
+		count, _ := controller.getData(code.GETILLUMINATIONCOUNT)
 		controller.lightCount = &count
 	}
 
@@ -565,27 +565,27 @@ func (controller *Controller) GetLightCount() int {
 }
 
 func (controller *Controller) GetIsLightActive(index int) bool {
-	result, _ := controller.getDataBoolConvert(code5.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
+	result, _ := controller.getDataBoolConvert(code.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
 		return (config >> 4) & 0xF
 	})
 	return result
 }
 func (controller *Controller) GetIsLightDimmable(index int) bool {
-	result, _ := controller.getDataBoolConvert(code5.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
+	result, _ := controller.getDataBoolConvert(code.ILLUMINATION1_PROPS+getOffset(index, 8, 28), func(config int) int {
 		return config & 0x8
 	})
 	return result
 }
 func (controller *Controller) GetLightOperationHours(index int) int {
-	result, _ := controller.getData(code5.ILLUMINATION1_OHM + getOffset(index, 8, 4))
+	result, _ := controller.getData(code.ILLUMINATION1_OHM + getOffset(index, 8, 4))
 	return result
 }
 func (controller *Controller) GetLightValue(index int) float64 {
-	result, _ := controller.getDataFloat(code5.ILLUMINATION1_ACTPERCENT+getOffset(index, 8, 4), 1)
+	result, _ := controller.getDataFloat(code.ILLUMINATION1_ACTPERCENT+getOffset(index, 8, 4), 1)
 	return result
 }
 func (controller *Controller) GetLightName(index int) string {
-	result, _ := controller.getDataText(code5.ILLUMINATION1_NAME + getOffset(index, 32, 1))
+	result, _ := controller.getDataText(code.ILLUMINATION1_NAME + getOffset(index, 32, 1))
 	return result
 }
 
@@ -596,7 +596,7 @@ func (controller *Controller) GetLightName(index int) string {
 func (controller *Controller) GetCurrentPumpCount() int {
 
 	if controller.pumpCount == nil {
-		count, _ := controller.getData(code5.GETCURRENTPUMPCOUNT)
+		count, _ := controller.getData(code.GETCURRENTPUMPCOUNT)
 		controller.pumpCount = &count
 	}
 
@@ -604,13 +604,13 @@ func (controller *Controller) GetCurrentPumpCount() int {
 }
 
 func (controller *Controller) GetIsCurrentPumpAssigned(index int) bool {
-	group1Mask, _ := controller.getData(code5.CURRENTCONTROL_GROUP1PUMPCOUNT)
+	group1Mask, _ := controller.getData(code.CURRENTCONTROL_GROUP1PUMPCOUNT)
 	i := uint(index)
 	if (group1Mask >> i & 0x1) == 1 {
 		return true
 	}
 
-	group2Mask, _ := controller.getData(code5.CURRENTCONTROL_GROUP2PUMPCOUNT)
+	group2Mask, _ := controller.getData(code.CURRENTCONTROL_GROUP2PUMPCOUNT)
 	if (group2Mask >> i & 0x1) == 1 {
 		return true
 	}
@@ -619,7 +619,7 @@ func (controller *Controller) GetIsCurrentPumpAssigned(index int) bool {
 }
 
 func (controller *Controller) GetCurrentPumpValue(index int) int {
-	result, _ := controller.getData(code5.CURRENTPUMP1_ACTPERCENT + getOffset(index, 4, 1))
+	result, _ := controller.getData(code.CURRENTPUMP1_ACTPERCENT + getOffset(index, 4, 1))
 	return result
 }
 
@@ -629,7 +629,7 @@ func (controller *Controller) GetCurrentPumpValue(index int) int {
 func (controller *Controller) GetProgrammableLogicCount() int {
 
 	if controller.logicCount == nil {
-		count, _ := controller.getData(code5.GETPROGLOGICCOUNT)
+		count, _ := controller.getData(code.GETPROGLOGICCOUNT)
 		controller.logicCount = &count
 	}
 
@@ -637,7 +637,7 @@ func (controller *Controller) GetProgrammableLogicCount() int {
 }
 
 func (controller *Controller) GetProgramLogicInput(input, index int) PortMode {
-	mode, _ := controller.getData(code5.PROGLOGIC1_INPUT1 + input + getOffset(index, 8, 4))
+	mode, _ := controller.getData(code.PROGLOGIC1_INPUT1 + input + getOffset(index, 8, 4))
 	// mode format
 	// 1234 1234 1234 1234
 	// RRRR RRPP PPPT TTTT
@@ -660,7 +660,7 @@ type LogicFunction struct {
 }
 
 func (controller *Controller) GetProgramLogicFunction(index int) LogicFunction {
-	mode, _ := controller.getData(code5.PROGLOGIC1_FUNCTION + getOffset(index, 8, 4))
+	mode, _ := controller.getData(code.PROGLOGIC1_FUNCTION + getOffset(index, 8, 4))
 
 	// mode format
 	// 1234 1234
@@ -685,7 +685,7 @@ func (controller *Controller) GetProgramLogicFunction(index int) LogicFunction {
 func (controller *Controller) GetSPortCount() int {
 
 	if controller.sPortCount == nil {
-		count, _ := controller.getData(code5.GETSWITCHCOUNT)
+		count, _ := controller.getData(code.GETSWITCHCOUNT)
 		controller.sPortCount = &count
 	}
 
@@ -709,7 +709,7 @@ func getIsProbe(mode types.DeviceMode) bool {
 }
 
 func (controller *Controller) GetSPortFunction(index int) PortMode {
-	mode, _ := controller.getData(code5.SWITCHPLUG1_FUNCTION + getOffset(index, 24, 1))
+	mode, _ := controller.getData(code.SWITCHPLUG1_FUNCTION + getOffset(index, 24, 1))
 
 	// mode format
 	// 1234 1234 1234 1234
@@ -731,12 +731,12 @@ func (controller *Controller) GetSPortFunction(index int) PortMode {
 }
 
 func (controller *Controller) GetSPortValue(index int) types.CurrentState {
-	value, _ := controller.getDataCurrentState(code5.SP1_STATE + getOffset(index, 24, 1))
+	value, _ := controller.getDataCurrentState(code.SP1_STATE + getOffset(index, 24, 1))
 	return value
 }
 
 func (controller *Controller) GetSPortName(index int) string {
-	result, _ := controller.getDataText(code5.SWITCHPLUG1_NAME + getOffset(index, 64, 1))
+	result, _ := controller.getDataText(code.SWITCHPLUG1_NAME + getOffset(index, 64, 1))
 	return result
 }
 
@@ -747,7 +747,7 @@ func (controller *Controller) GetSPortName(index int) string {
 func (controller *Controller) GetLPortCount() int {
 
 	if controller.lPortCount == nil {
-		count, _ := controller.getData(code5.GETONTETOTENVINTCOUNT)
+		count, _ := controller.getData(code.GETONTETOTENVINTCOUNT)
 		controller.lPortCount = &count
 	}
 
@@ -755,7 +755,7 @@ func (controller *Controller) GetLPortCount() int {
 }
 
 func (controller *Controller) GetLPortFunction(index int) PortMode {
-	mode, _ := controller.getData(code5.L1TO10VINT1_FUNCTION + getOffset(index, 10, 3))
+	mode, _ := controller.getData(code.L1TO10VINT1_FUNCTION + getOffset(index, 10, 3))
 
 	// mode format
 	// 1234 1234
@@ -781,7 +781,7 @@ const (
 
 func (controller *Controller) GetLPortValue(index int) float64 {
 
-	value, _ := controller.getData(code5.L1TO10VINT1_PWMVALUE + getOffset(index, 10, 1))
+	value, _ := controller.getData(code.L1TO10VINT1_PWMVALUE + getOffset(index, 10, 1))
 
 	if value < LValueMin {
 		return 0
@@ -798,7 +798,7 @@ func (controller *Controller) FeedPause(index int, activate bool) error {
 		command = (index << 16) | (0xFF << 8) | SfFeedPause
 	}
 
-	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	err := controller.p.SendData(code.INVOKESPECIALFUNCTION, command)
 	if err != nil {
 		log.Errorf(err, "FeedPause: %s", err.Error())
 		return err
@@ -809,7 +809,7 @@ func (controller *Controller) FeedPause(index int, activate bool) error {
 
 func (controller *Controller) ClearReminder(reminder int) error {
 	offset := getOffset(reminder, BlockitemsReminder, BlocksizeReminder)
-	err := controller.p.SendData(code5.MEM1_NEXTMEM+offset, 0xFFFF)
+	err := controller.p.SendData(code.MEM1_NEXTMEM+offset, 0xFFFF)
 	if err != nil {
 		log.Errorf(err, "ClearReminder: %s", err.Error())
 		return err
@@ -824,7 +824,7 @@ func (controller *Controller) ResetReminder(reminder int, period int) error {
 	data := int(span.Hours() / 24)
 
 	offset := getOffset(reminder, BlockitemsReminder, BlocksizeReminder)
-	err := controller.p.SendData(code5.MEM1_NEXTMEM+offset, data)
+	err := controller.p.SendData(code.MEM1_NEXTMEM+offset, data)
 	if err != nil {
 		log.Errorf(err, "ClearReminder: %s", err.Error())
 		return err
@@ -834,7 +834,7 @@ func (controller *Controller) ResetReminder(reminder int, period int) error {
 }
 
 func (controller *Controller) ClearLevelAlarm(index int) error {
-	err := controller.p.SendData(code5.LEVEL1_ACTSTATE+getOffset(index, 3, 1), 0)
+	err := controller.p.SendData(code.LEVEL1_ACTSTATE+getOffset(index, 3, 1), 0)
 
 	if err != nil {
 		log.Errorf(err, "ClearLevelAlarm: %s", err.Error())
@@ -846,7 +846,7 @@ func (controller *Controller) ClearLevelAlarm(index int) error {
 
 func (controller *Controller) Thunderstorm(duration int) error {
 	command := (duration << 8) | SfThunderstorm
-	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	err := controller.p.SendData(code.INVOKESPECIALFUNCTION, command)
 	if err != nil {
 		log.Errorf(err, "Thunderstorm: %s", err.Error())
 		return err
@@ -857,7 +857,7 @@ func (controller *Controller) Thunderstorm(duration int) error {
 
 func (controller *Controller) WaterChange(index int) error {
 	command := index<<16 | (0xFF << 8) | SfWaterChange
-	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	err := controller.p.SendData(code.INVOKESPECIALFUNCTION, command)
 	if err != nil {
 		log.Errorf(err, "WaterChange: %s", err.Error())
 		return err
@@ -872,7 +872,7 @@ func (controller *Controller) Maintenance(activate bool, index int) error {
 		command = (index << 16) | (0xFF << 8) | SfMaintenance
 	}
 
-	err := controller.p.SendData(code5.INVOKESPECIALFUNCTION, command)
+	err := controller.p.SendData(code.INVOKESPECIALFUNCTION, command)
 
 	if err != nil {
 		log.Errorf(err, "Maintenance: %s", err.Error())

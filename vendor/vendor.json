@@ -21,6 +21,18 @@
 			"revisionTime": "2017-12-08T16:08:15Z"
 		},
 		{
+			"checksumSHA1": "iQQcKp8e/Kyf3olmUehjwri3ABw=",
+			"path": "github.com/lib/pq",
+			"revision": "90697d60dd844d5ef6ff15135d0203f65d2f53b8",
+			"revisionTime": "2018-05-23T17:54:26Z"
+		},
+		{
+			"checksumSHA1": "QPjV8nrnzjkHGgLYwlqYCOSbwH4=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "90697d60dd844d5ef6ff15135d0203f65d2f53b8",
+			"revisionTime": "2018-05-23T17:54:26Z"
+		},
+		{
 			"checksumSHA1": "WnL/x0i1j2b7HZGV1sSKhaTQRbg=",
 			"path": "github.com/nats-io/go-nats",
 			"revision": "f0d9c5988d4c2a17ad466fcdffe010165c46434e",

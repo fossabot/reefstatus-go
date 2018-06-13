@@ -7,7 +7,9 @@ import (
 )
 
 type SPort struct {
-	DeviceInfo
+	BaseInfo
+	PortNumber         int
+	Mode               profilux.PortMode
 	Value              types.CurrentState
 	CurrentColourValue int
 	IsActive           bool

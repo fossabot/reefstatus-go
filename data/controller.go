@@ -442,22 +442,22 @@ func (controller *controller) UpdateSPorts(profiluxController *profilux.Controll
 }
 
 func (controller *controller) UpdateLPorts(profiluxController *profilux.Controller) {
-	for i := 0; i < profiluxController.GetLPortCount(); i++ {
-		port, found := controller.lPorts[i]
+	for portNumber := 0; portNumber < profiluxController.GetLPortCount(); portNumber++ {
+		port, found := controller.lPorts[portNumber]
 
-		mode := profiluxController.GetLPortFunction(i)
+		mode := profiluxController.GetLPortFunction(portNumber)
 
 		if mode.DeviceMode != types.DeviceModeAlwaysOff {
 			if !found {
-				port = models.NewLPort(i)
-				controller.lPorts[i] = port
+				port = models.NewLPort(portNumber)
+				controller.lPorts[portNumber] = port
 			}
 
 			port.Update(profiluxController)
 
 		} else {
 			if found {
-				delete(controller.lPorts, i)
+				delete(controller.lPorts, portNumber)
 			}
 		}
 	}
