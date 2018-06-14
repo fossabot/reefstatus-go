@@ -26,7 +26,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "frontend/web/public/default.html")
+		http.ServeFile(w, r, "frontend/ReefStatus/dist/ReefStatus/index.html")
 	})
 
 	routes.SetupControllerRoute(r)
@@ -34,7 +34,7 @@ func main() {
 	routes.SetupDataRoute(r)
 	routes.SetupSettingsRoute(r)
 
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("frontend/web/public"))))
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("frontend/ReefStatus/dist/ReefStatus"))))
 
 	srv := &http.Server{
 		Handler:      r,

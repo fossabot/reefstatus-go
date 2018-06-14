@@ -8,7 +8,12 @@ node {
      String goPath = "/go/src/github.com/cjburchell/reefstatus-go"
      String workspacePath =  """${env.WORKSPACE}"""
 
-     stage('Build') {
+     stage('Build Frontend') {
+        sh """cd frontend/ReefStatus && npm install"""
+        sh """cd frontend/ReefStatus && npm ng build --prod"""
+     }
+
+     stage('Build Server') {
        docker.image('golang:1.8.0-alpine').inside("-v ${workspacePath}:${goPath}"){
            sh """cd ${goPath} && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main"""
           }
