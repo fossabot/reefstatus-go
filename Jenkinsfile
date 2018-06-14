@@ -11,7 +11,7 @@ node {
      stage('Build Frontend') {
       docker.image('node:10-alpine').inside("-v ${workspacePath}:${goPath}"){
                 sh """cd ${goPath}/frontend/ReefStatus && npm install"""
-                sh """cd ${goPath}/frontend/ReefStatus && npm ng build --prod"""
+                sh """cd ${goPath}/frontend/ReefStatus && ng build --prod"""
                }
      }
 
