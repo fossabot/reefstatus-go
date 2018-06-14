@@ -9,7 +9,7 @@ node {
      String workspacePath =  """${env.WORKSPACE}"""
 
      stage('Build Frontend') {
-      docker.image('node:10-alpine').inside("-v ${workspacePath}:${goPath}"){
+      docker.image('node:10').inside("-v ${workspacePath}:${goPath}"){
                 sh """sudo npm install -g @angular/cli"""
                 sh """cd ${goPath}/frontend/ReefStatus && npm install"""
                 sh """cd ${goPath}/frontend/ReefStatus && ng build --prod"""
