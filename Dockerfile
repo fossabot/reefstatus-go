@@ -1,6 +1,7 @@
 FROM scratch
 
-COPY .  /server
+COPY main  /server
+COPY frontend/ReefStatus/dist  /server/frontend/ReefStatus/dist
 
 WORKDIR  /server
 
